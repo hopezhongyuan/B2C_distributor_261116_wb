@@ -1,9 +1,10 @@
 # 架构设计文档（Architecture）
 
-> 版本：v0.1（M0.1 骨架）
+> 版本：v0.2（M2.1 佣金状态机复审定稿）
 > 日期：2026-11-16
-> 关联：PRD v0.3 · AGENTS.md
+> 关联：PRD v0.3 · AGENTS.md · docs/design/distribution-flow.md（分销链路流程）
 > 本文档是架构与数据模型的唯一事实源（AGENTS.md §2.2）
+> **v0.2 变更**：§4.2 佣金状态机定稿（对齐 M1 实现）；§5 契约清单更新（relation/commission 定稿）；分销链路业务规则见 design/distribution-flow.md
 
 ---
 
@@ -46,8 +47,9 @@
 
 | 模块 | 职责 | 鉴权 |
 |---|---|---|
-| auth | code2session 登录、JWT 签发刷新 | 公开 |
-| user | 用户资料、推荐关系查询 | 用户 JWT |
+| auth | code2session 登录、JWT 签发刷新、关系绑定事务 | 公开 |
+| user | 用户资料 | 用户 JWT |
+| relation | 绑定状态查询、我的团队（只读；绑定写入口在 auth） | 用户 JWT |
 | product | 商品列表/详情（读）、商品管理（写） | 读公开 / 写 RBAC |
 | order | 下单、支付下单参数、支付回调、确认收货、售后申请 | 用户 JWT / 回调验签 |
 | commission | 佣金生成、结算、冲销、明细查询 | 用户 JWT / 内部调用 |
@@ -112,23 +114,30 @@ PAID/DELIVERED/COMPLETED ──申请售后──▶ REFUNDING ──全额退�
 - 虚拟服务 `REDEEMED` 即完成态，无物流环节
 - 进入 `REFUNDING` 时冻结后续状态迁移，直至退款终态
 
-### 4.2 佣金状态机（核心，与订单联动）
+### 4.2 佣金状态机（定稿 v1.0，M2.1 复审通过，与订单联动）
 
 ```
 【实物商品】
-  订单 PAID ──▶ 生成佣金: FROZEN
-  订单 COMPLETED + 售后期(默认7天)满 ──▶ AVAILABLE
+  订单 PAID ──▶ 生成佣金: FROZEN        （markPaid 同事务调 generateForOrder(mode='paid')）
+  订单 COMPLETED + 售后期(默认7天)满 ──▶ AVAILABLE   （settleExpiredFrozen 每小时扫描）
   订单 REFUNDED(全额) ──▶ VOID（仅 FROZEN 可作废）
   订单 PARTIAL_REFUNDED ──▶ FROZEN 金额按退款比例扣减（记账调整，不换状态）
 
 【虚拟服务】（核销后结，PRD 决策 #3）
-  订单 REDEEMED ──▶ 直接生成佣金: AVAILABLE（无售后期，购买页已明示不可退）
+  订单 REDEEMED ──▶ 直接生成佣金: AVAILABLE（generateForOrder(mode='redeemed')，无售后期）
 
-【提现】
+【提现】（M3 实施）
   AVAILABLE ──提现申请锁定──▶ WITHDRAWING ──打款成功──▶ PAID
   WITHDRAWING ──审核驳回/打款失败──▶ AVAILABLE（退回）
   PAID 为终态，记录 withdrawal_id 可追溯
 ```
+
+定稿记录（2026-11-16，M2.1 复审）：
+- 生成时机双入口收敛为 `generateForOrder(order, items, buyerId, mode, t)`，mode ∈ {paid, redeemed}，与订单落账同事务；
+- 幂等兜底：`commissions` 表以 (order_id, level) 唯一约束防回调重放/对账重跑重复生成；
+- 结算入口唯一：`settleExpiredFrozen(afterSaleDays)` 定时 job（每小时），禁止其他路径改 FROZEN → AVAILABLE；
+- 封禁收款人：生成时分销员已 banned → 佣金照常生成但保持 FROZEN，后台人工裁决（M4）；
+- 流程图与绑定规则见 `docs/design/distribution-flow.md`（唯一事实源分工：状态机在本节，链路流程在 design）。
 
 不变式（对账与测试的依据）：
 1. 每笔支付成功的订单，按买家关系链**恰好生成** ≤2 条佣金记录（无上级则少生成，不补发）
@@ -140,11 +149,12 @@ PAID/DELIVERED/COMPLETED ──申请售后──▶ REFUNDING ──全额退�
 
 | 模块文件 | 核心接口 | 优先级 |
 |---|---|---|
-| api/auth.md | POST /api/auth/login（code 换 JWT） | M1 |
-| api/product.md | GET 列表/详情；admin CRUD | M1 |
-| api/order.md | 下单、预支付参数、回调、确认收货、售后 | M1 |
-| api/commission.md | 明细查询、汇总；内部：generate/settle/void | M2 |
-| api/user.md | 资料、我的推荐人、绑定状态 | M2 |
+| api/auth.md | POST /api/auth/login（code 换 JWT，含关系绑定） | M1 已定稿 |
+| api/product.md | GET 列表/详情（含 ids 批量）；admin CRUD | M1 已定稿 |
+| api/order.md | 下单、预支付参数、回调、确认收货、售后 | M1 已定稿 |
+| api/relation.md | 绑定状态查询、我的团队（L1/L2） | M2 已定稿 |
+| api/commission.md | 佣金明细/汇总查询；内部：generate/settle/void | M2 已定稿 |
+| api/user.md | 资料、实名信息（提现前置） | M3 |
 | api/withdraw.md | 申请、记录、余额 | M3 |
 | api/admin.md | 登录、各管理模块 CRUD、审核操作 | M4 |
 

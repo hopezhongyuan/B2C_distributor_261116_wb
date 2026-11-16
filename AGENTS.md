@@ -103,7 +103,6 @@
 | server | 微信支付 v3 SDK（M0 定型，候选 wechatpay-node-v3） | 支付/退款/商家转账 |
 | server | node-cron | 定时对账任务 |
 | admin-web | vue3 + tdesign-vue-next + axios | 后台前端 |
-| server | 阿里云 OSS SDK | 商品图与海报素材存储 |
 
 - 鉴权约定：小程序端登录走 code2session 换 openid，服务端签发 JWT；管理端独立账号体系 + RBAC。
 - 佣金计算逻辑**只存在于 server 的 commission 服务**，order 等其他模块只调用、不复制，防止规则散落。

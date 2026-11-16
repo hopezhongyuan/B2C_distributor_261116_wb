@@ -35,7 +35,32 @@
         bindtap="goPay"
         data-id="{{item.id}}"
       >去支付</view>
+      <view
+        wx:elif="{{item.canRefund}}"
+        class="btn-mini btn-ghost"
+        bindtap="openRefund"
+        data-id="{{item.id}}"
+      >申请退款</view>
     </view>
   </view>
   <view wx:if="{{noMore}}" class="empty-box">— 没有更多了 —</view>
+</view>
+
+<!-- 申请退款弹窗 -->
+<view wx:if="{{refundShow}}" class="mask" bindtap="closeRefund">
+  <view class="dialog" catchtap="noop">
+    <view class="dialog-title">申请退款</view>
+    <view class="field-row">
+      <text class="field-label">退款金额</text>
+      <input class="field-input" type="digit" value="{{refundAmount}}" bindinput="onRefundAmount" />
+    </view>
+    <view class="field-row">
+      <text class="field-label">退款原因</text>
+      <input class="field-input" value="{{refundReason}}" placeholder="选填" bindinput="onRefundReason" />
+    </view>
+    <view class="dialog-btns">
+      <view class="dialog-btn cancel" bindtap="closeRefund">取消</view>
+      <view class="dialog-btn primary" bindtap="submitRefund">提交</view>
+    </view>
+  </view>
 </view>

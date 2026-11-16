@@ -6,6 +6,7 @@ const orderAdmin = require('../services/order.admin.service');
 const userAdmin = require('../services/user.admin.service');
 const configAdmin = require('../services/config.admin.service');
 const commissionAdmin = require('../services/commission.admin.service');
+const refundAdmin = require('../services/refund.admin.service');
 const dashboardService = require('../services/dashboard.service');
 const { ok } = require('../middlewares/errorHandler');
 
@@ -86,6 +87,20 @@ async function dashboard(req, res) {
   return ok(res, await dashboardService.overview());
 }
 
+// —— 退款审核（批次 A） ——
+async function refundList(req, res) {
+  return ok(res, await refundAdmin.list({ status: req.query.status, ...pageArgs(req) }));
+}
+async function refundAudit(req, res) {
+  const body = req.body || {};
+  return ok(res, await refundAdmin.audit(numId(req.params.id), {
+    approve: body.approve === true, note: body.note, adminId: req.admin.id
+  }));
+}
+async function refundRetry(req, res) {
+  return ok(res, await refundAdmin.retryApprove(numId(req.params.id)));
+}
+
 // —— 参数配置 ——
 async function configList(req, res) {
   return ok(res, await configAdmin.listAll());
@@ -99,5 +114,6 @@ module.exports = {
   productList, productCreate, productUpdate, productStatus,
   orderList, orderRedeem, distributorList, distributorStatus,
   commissionSummary, commissionList, dashboard,
+  refundList, refundAudit, refundRetry,
   configList, configUpdate
 };

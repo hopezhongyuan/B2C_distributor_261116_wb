@@ -88,6 +88,22 @@
 **错误码**：1003（非管理员） / 3001 / 3002（状态非 PAID）。
 **幂等性**：状态机保证 + idempotency_keys 记录核销操作流水。
 
+## POST /api/orders/:id/refund
+
+**功能描述**：申请售后退款（批次 A）。可退状态 = PAID / DELIVERED / COMPLETED（实物与未核销虚拟）；REDEEMED 核销后不可退（PRD 决策 #3）。订单转 REFUNDING，生成 PENDING 退款单，等待管理端审核。
+**请求体**：`{ amountCents: 正整数分, reason?: string(≤128) }`；金额 ≤ 可退余额（实付 - 已退合计）；同一订单同时只允许一笔在途退款（PENDING/APPROVED）。
+**响应**：`{ refundId, refundNo, status: 'PENDING' }`。
+**错误码**：1001（金额非法/超余额）/ 1002 / 3001 / 3002（状态不可退 / 已有在途退款）。
+
+## GET /api/orders/:id/refunds
+
+**功能描述**：本订单退款记录（本人）。返回 `{ list: [{refundNo, amountCents, reason, status, auditNote, refundTime}] }`。
+**状态机**：PENDING → APPROVED（微信受理）→ REFUNDED（回调/查证确认，触发佣金冲销 + 全额退归还库存）；PENDING → REJECTED（驳回，订单回原状态）；APPROVED → FAILED（微信关闭/异常，订单回原状态可重申）。
+
+## POST /api/payment/refund-notify
+
+**功能描述**：微信退款结果回调。验签（同支付回调）→ 解密 → `refund_status=SUCCESS` 落账（佣金冲销事务：全额退冻结/可提现佣金 VOID、部分退按比例扣减、已提现部分计入分销员欠款 debt_cents 并冻结提现直至还清——PRD §3.3）。幂等，重复回调直接成功。
+
 ## 通用约定
 
 - 响应格式 `{code, data, msg}`；金额一律整数分；状态枚举见 architecture.md §4.1。

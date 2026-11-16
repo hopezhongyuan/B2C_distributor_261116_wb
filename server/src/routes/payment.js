@@ -4,6 +4,7 @@
 const express = require('express');
 const wxpayService = require('../services/wxpay.service');
 const orderService = require('../services/order.service');
+const refundService = require('../services/refund.service');
 
 const router = express.Router();
 
@@ -18,6 +19,24 @@ router.post('/notify', express.raw({ type: '*/*', limit: '256kb' }), async (req,
   } catch (e) {
     // 任何失败（验签/解密/落账）都返回失败，让微信按策略重试；对账 job 兜底
     console.error('[payment.notify] failed:', e.msg || e.message);
+    return res.status(500).json({ code: 'FAIL', message: e.msg || '处理失败' });
+  }
+});
+
+// 退款结果回调（契约：docs/api/order.md §退款）：验签 → 落账（佣金冲销在 finalizeSuccess 事务内）
+router.post('/refund-notify', express.raw({ type: '*/*', limit: '256kb' }), async (req, res) => {
+  const raw = Buffer.isBuffer(req.body) ? req.body : req.rawBody;
+  const rawBody = raw ? raw.toString('utf8') : String(req.body || '');
+  try {
+    const { refundNo, refundStatus, wxRefundId } = await wxpayService.handleRefundNotify(req.headers, rawBody);
+    if (refundStatus === 'SUCCESS') {
+      await refundService.finalizeSuccess(refundNo, wxRefundId, new Date());
+    } else if (refundStatus === 'CLOSED' || refundStatus === 'ABNORMAL') {
+      await refundService.finalizeFailure(refundNo);
+    }
+    return res.status(200).json({ code: 'SUCCESS', message: '成功' });
+  } catch (e) {
+    console.error('[payment.refund-notify] failed:', e.msg || e.message);
     return res.status(500).json({ code: 'FAIL', message: e.msg || '处理失败' });
   }
 });

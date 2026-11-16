@@ -37,6 +37,7 @@ const menus = [
   { path: '/distribution', title: '分销管理' },
   { path: '/commissions', title: '佣金管理' },
   { path: '/withdrawals', title: '提现审核' },
+  { path: '/refunds', title: '退款审核' },
   { path: '/configs', title: '参数配置' },
   { path: '/dashboard', title: '数据看板' }
 ];

@@ -36,6 +36,9 @@ db.Config = Config(sequelize);
 db.IdempotencyKey = IdempotencyKey(sequelize);
 db.Withdrawal = require('./withdrawals')(sequelize);
 db.AdminUser = require('./adminUsers')(sequelize);
+const { RefundFactory, REFUND_STATUS } = require('./refunds');
+db.Refund = RefundFactory(sequelize);
+db.REFUND_STATUS = REFUND_STATUS;
 
 // 关联
 db.User.hasMany(db.Order, { foreignKey: 'user_id' });
@@ -47,6 +50,8 @@ db.Commission.belongsTo(db.Order, { foreignKey: 'order_id' });
 db.Commission.belongsTo(db.User, { foreignKey: 'beneficiary_id', as: 'beneficiary' });
 db.User.hasMany(db.Withdrawal, { foreignKey: 'user_id' });
 db.Withdrawal.belongsTo(db.User, { foreignKey: 'user_id' });
+db.Order.hasMany(db.Refund, { foreignKey: 'order_id' });
+db.Refund.belongsTo(db.Order, { foreignKey: 'order_id' });
 
 async function assertConnection() {
   await sequelize.authenticate();

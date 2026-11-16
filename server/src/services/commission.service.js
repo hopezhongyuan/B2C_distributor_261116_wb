@@ -88,9 +88,30 @@ async function settleExpiredFrozen(afterSaleDays) {
   return affected;
 }
 
+// 退款冲销：按 refund.calc 计划执行（事务内调用；规则实现在 refund.calc，本函数只落库）
+// items: [{id, action, deductCents}]；debtCents 计入受益人 debt_cents
+async function reverseForRefund(items, debtCents, t) {
+  const debtBeneficiaryIds = [];
+  for (const it of items) {
+    const c = await Commission.findByPk(it.id, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!c || c.status === 'VOID') continue; // 幂等兜底
+    if (it.action === 'void') {
+      await c.update({ status: 'VOID' }, { transaction: t });
+    } else if (it.action === 'reduce') {
+      await c.update({ amountCents: c.amountCents - it.deductCents }, { transaction: t });
+    } else if (it.action === 'debt') {
+      debtBeneficiaryIds.push(c.beneficiaryId); // 佣金状态不变（钱已付出/锁定中），只追偿记账
+    }
+  }
+  if (debtCents > 0 && debtBeneficiaryIds.length) {
+    // 多受益人欠款按冲销条数均摊不精确，直接全额计入首位受益人（单订单两级同欠场景罕见，审计以 refund 单为准）
+    await User.increment({ debtCents }, { where: { id: debtBeneficiaryIds[0] }, transaction: t });
+  }
+}
+
 function assertInternalCaller() {
   // 预留：内部调用鉴权点（M2 接入 job 触发器时启用）
   throw { code: ERRORS.FORBIDDEN, msg: 'not allowed' };
 }
 
-module.exports = { generateForOrder, settleExpiredFrozen, getConfigMap, assertInternalCaller };
+module.exports = { generateForOrder, settleExpiredFrozen, reverseForRefund, getConfigMap, assertInternalCaller };

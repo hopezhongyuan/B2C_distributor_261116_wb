@@ -54,4 +54,46 @@ async function handleNotify(headers, rawBodyStr) {
   };
 }
 
-module.exports = { createJsapiOrder, handleNotify, buildPayParams };
+// 申请退款（API v3）：受理成功返回 { wxRefundId, status }；资金到账以回调/查证为准
+async function createRefund(order, refundNo, refundCents) {
+  core.assertConfigured();
+  const res = await core.apiRequest('POST', '/v3/refund/domestic/refunds', {
+    out_trade_no: order.orderNo,
+    out_refund_no: refundNo,
+    reason: '售后退款',
+    notify_url: config.wxpay.notifyUrl.replace(/\/notify$/, '/refund-notify'),
+    amount: { refund: refundCents, total: order.payableCents, currency: 'CNY' }
+  });
+  return { wxRefundId: res.refund_id || null, status: res.status || 'PROCESSING' };
+}
+
+// 主动查证退款单（回调丢失兜底）：返回 { status, successAt }
+async function queryRefund(refundNo) {
+  core.assertConfigured();
+  const res = await core.apiRequest('GET', `/v3/refund/domestic/refunds/${refundNo}`, null);
+  return {
+    status: res.status,
+    successAt: res.success_time ? new Date(res.success_time) : null,
+    amount: res.amount ? res.amount.refund : null
+  };
+}
+
+// 退款回调处理：验签 → 解密 → 返回 { refundNo, refundStatus, wxRefundId }
+async function handleRefundNotify(headers, rawBodyStr) {
+  await core.verifyNotifySignature(headers, rawBodyStr);
+  const envelope = JSON.parse(rawBodyStr);
+  if (!envelope.resource) throw { code: ERRORS.WX_API_ERROR, msg: '回调缺 resource' };
+  const r = envelope.resource;
+  const plain = core.decryptAesGcm(r.nonce, r.ciphertext, r.associated_data);
+  const payload = JSON.parse(plain);
+  if (payload.mchid !== config.wxpay.mchid) {
+    throw { code: ERRORS.WX_API_ERROR, msg: '商户号不匹配' };
+  }
+  return {
+    refundNo: payload.out_refund_no,
+    wxRefundId: payload.refund_id || null,
+    refundStatus: payload.refund_status // SUCCESS / CLOSED / ABNORMAL / PROCESSING
+  };
+}
+
+module.exports = { createJsapiOrder, handleNotify, buildPayParams, createRefund, queryRefund, handleRefundNotify };

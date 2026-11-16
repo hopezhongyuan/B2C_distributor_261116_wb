@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 const config = require('../config');
 const { sequelize, Order, OrderItem, Product } = require('../models');
 const orderService = require('../services/order.service');
+const refundAdmin = require('../services/refund.admin.service');
 const wxpay = require('../services/wxpay.core');
 
 const RECONCILE_DELAY_MS = 2 * 60 * 1000; // 下单 2 分钟后才对账，给回调留窗口
@@ -88,7 +89,11 @@ async function reconcilePendingOrders() {
 function startOrderJobs() {
   cron.schedule('*/2 * * * *', () => reconcilePendingOrders().catch((e) => console.error('[job.order] reconcile crash:', e.message)));
   cron.schedule('*/5 * * * *', () => closeExpiredOrders().catch((e) => console.error('[job.order] close crash:', e.message)));
-  console.log('[jobs] order jobs registered: reconcile(2min), close-expired(5min)');
+  // 退款查证兜底（批次 A）：APPROVED 超 10 分钟未收到回调 → 主动查证落账
+  cron.schedule('*/10 * * * *', () => refundAdmin.reconcileApproved(10 * 60 * 1000)
+    .then((r) => { if (r.scanned) console.log(`[job.refund] reconcile scanned=${r.scanned} confirmed=${r.confirmed}`); })
+    .catch((e) => console.error('[job.refund] reconcile crash:', e.message)));
+  console.log('[jobs] order jobs registered: reconcile(2min), close-expired(5min), refund-reconcile(10min)');
 }
 
 module.exports = { closeExpiredOrders, reconcilePendingOrders, closeOne, startOrderJobs };

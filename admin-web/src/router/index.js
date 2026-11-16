@@ -14,6 +14,7 @@ const routes = [
       { path: 'distribution', name: 'distribution', component: () => import('../views/DistributorManage.vue'), meta: { title: '分销管理', module: 'distribution' } },
       { path: 'commissions', name: 'commissions', component: () => import('../views/CommissionManage.vue'), meta: { title: '佣金管理', module: 'commission' } },
       { path: 'withdrawals', name: 'withdrawals', component: () => import('../views/WithdrawAudit.vue'), meta: { title: '提现审核', module: 'withdraw' } },
+      { path: 'refunds', name: 'refunds', component: () => import('../views/RefundAudit.vue'), meta: { title: '退款审核', module: 'refund' } },
       { path: 'configs', name: 'configs', component: () => import('../views/ConfigManage.vue'), meta: { title: '参数配置', module: 'config' } },
       { path: 'dashboard', name: 'dashboard', component: () => import('../views/DataDashboard.vue'), meta: { title: '数据看板', module: 'dashboard' } }
     ]

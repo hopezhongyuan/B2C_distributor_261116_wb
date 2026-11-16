@@ -25,6 +25,11 @@ router.post('/products/:id/status', requireAdmin, requireRole(OPS), asyncHandler
 router.get('/orders', requireAdmin, asyncHandler(ctrl.orderList));
 router.post('/orders/:id/redeem', requireAdmin, requireRole(OPS), asyncHandler(ctrl.orderRedeem));
 
+// 退款审核（批次 A）：读=全部；审核/打款=super+finance（资金红线与提现同级）
+router.get('/refunds', requireAdmin, asyncHandler(ctrl.refundList));
+router.post('/refunds/:id/audit', requireAdmin, requireRole(FIN), asyncHandler(ctrl.refundAudit));
+router.post('/refunds/:id/retry', requireAdmin, requireRole(FIN), asyncHandler(ctrl.refundRetry));
+
 // 分销员管理（M4）
 router.get('/distributors', requireAdmin, asyncHandler(ctrl.distributorList));
 router.post('/distributors/:id/status', requireAdmin, requireRole(OPS), asyncHandler(ctrl.distributorStatus));

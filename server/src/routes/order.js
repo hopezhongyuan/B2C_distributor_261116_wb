@@ -11,6 +11,8 @@ router.get('/', requireUser, wrap(controller.list));
 router.post('/:id/pay', requireUser, wrap(controller.pay));
 router.get('/:id', requireUser, wrap(controller.detail));
 router.post('/:id/confirm', requireUser, wrap(controller.confirm));
+router.post('/:id/refund', requireUser, wrap(controller.refundApply));
+router.get('/:id/refunds', requireUser, wrap(controller.refundList));
 // 虚拟服务核销已迁移至管理端 RBAC：POST /api/admin/orders/:id/redeem（docs/api/admin.md §8）
 
 module.exports = router;

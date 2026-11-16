@@ -1,4 +1,4 @@
-// 订单列表：状态筛选 + 分页；待付款订单可继续拉起支付
+// 订单列表：状态筛选 + 分页；待付款可支付；已付订单可申请退款（契约 docs/api/order.md §退款）
 const orderService = require('../../services/order.service');
 const { fenToParts, ORDER_STATUS_TEXT } = require('../../utils/format');
 
@@ -10,12 +10,15 @@ const TABS = [
   { key: 'COMPLETED', label: '已完成' }
 ];
 
+const REFUNDABLE = ['PAID', 'DELIVERED', 'COMPLETED'];
+
 function decorate(o) {
   const first = (o.OrderItems && o.OrderItems[0]) || {};
   return {
     ...o,
     payable: fenToParts(o.payableCents),
     statusText: ORDER_STATUS_TEXT[o.status] || o.status,
+    canRefund: REFUNDABLE.includes(o.status),
     coverImage: first.coverImage || '',
     title: (o.OrderItems || []).length > 1
       ? `${first.title} 等${o.OrderItems.length}件`
@@ -33,7 +36,12 @@ Page({
     page: 1,
     pageSize: 10,
     noMore: false,
-    paying: false
+    paying: false,
+    refundShow: false,
+    refundOrderId: null,
+    refundMax: 0,
+    refundAmount: '',
+    refundReason: ''
   },
 
   onLoad(options) {
@@ -90,5 +98,39 @@ Page({
 
   goDetail(e) {
     wx.navigateTo({ url: '/pages/product-detail/product-detail?id=' + e.currentTarget.dataset.pid });
+  },
+
+  // —— 申请退款（内联弹窗：金额 + 原因） ——
+  openRefund(e) {
+    const order = this.data.list.find((o) => o.id === e.currentTarget.dataset.id);
+    if (!order) return;
+    this.setData({
+      refundShow: true,
+      refundOrderId: order.id,
+      refundMax: order.payableCents,
+      refundAmount: (order.payableCents / 100).toFixed(2),
+      refundReason: ''
+    });
+  },
+
+  onRefundAmount(e) { this.setData({ refundAmount: e.detail.value }); },
+  onRefundReason(e) { this.setData({ refundReason: e.detail.value }); },
+  closeRefund() { this.setData({ refundShow: false }); },
+
+  noop() {},
+
+  submitRefund() {
+    const cents = Math.round(parseFloat(this.data.refundAmount, 10) * 100);
+    if (!Number.isInteger(cents) || cents <= 0 || cents > this.data.refundMax) {
+      return wx.showToast({ title: '退款金额不正确', icon: 'none' });
+    }
+    orderService
+      .applyRefund(this.data.refundOrderId, cents, this.data.refundReason)
+      .then(() => {
+        this.setData({ refundShow: false });
+        wx.showToast({ title: '已提交，待平台审核', icon: 'none' });
+        this.fetch(true);
+      })
+      .catch((err) => wx.showToast({ title: err.msg || '提交失败', icon: 'none' }));
   }
 });

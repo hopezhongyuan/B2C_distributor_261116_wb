@@ -1,5 +1,6 @@
 // order.controller（契约：docs/api/order.md）
 const orderService = require('../services/order.service');
+const refundService = require('../services/refund.service');
 const wxpayService = require('../services/wxpay.service');
 const ERRORS = require('../config/errors');
 const { ok, fail } = require('../middlewares/errorHandler');
@@ -56,4 +57,19 @@ async function confirm(req, res) {
   return ok(res, { orderId: order.id, status: order.status });
 }
 
-module.exports = { create, pay, list, detail, confirm };
+// 申请退款（契约 §退款）：金额分正整数 + 原因
+async function refundApply(req, res) {
+  const { amountCents, reason } = req.body || {};
+  if (!Number.isInteger(amountCents) || amountCents <= 0) {
+    return fail(res, ERRORS.PARAM_INVALID, 'amountCents 非法');
+  }
+  const refund = await refundService.apply(req.user.uid, Number(req.params.id), { amountCents, reason });
+  return ok(res, { refundId: refund.id, refundNo: refund.refundNo, status: refund.status });
+}
+
+async function refundList(req, res) {
+  const list = await refundService.listByOrder(req.user.uid, Number(req.params.id));
+  return ok(res, { list });
+}
+
+module.exports = { create, pay, list, detail, confirm, refundApply, refundList };

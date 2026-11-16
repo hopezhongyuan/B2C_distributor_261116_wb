@@ -76,7 +76,11 @@ async function applyWithdraw(uid, { amountCents, realName, idCardNo }) {
     throw { code: ERRORS.PARAM_INVALID, msg: '金额非法' };
   }
   return Sequelize.transaction(async (t) => {
-    const user = await User.findByPk(uid, { attributes: ['id', 'realName'], transaction: t, lock: t.LOCK.UPDATE });
+    const user = await User.findByPk(uid, { attributes: ['id', 'realName', 'debtCents'], transaction: t, lock: t.LOCK.UPDATE });
+    // PRD §3.3：退款追偿欠款还清前冻结提现
+    if (Number(user.debtCents) > 0) {
+      throw { code: ERRORS.WITHDRAW_AMOUNT_INVALID, msg: `存在退款欠款 ¥${(user.debtCents / 100).toFixed(2)}，还清前暂不可提现` };
+    }
     const inFlight = await Withdrawal.count({
       where: { userId: uid, status: { [Op.in]: IN_FLIGHT } },
       transaction: t

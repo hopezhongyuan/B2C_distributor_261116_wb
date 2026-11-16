@@ -15,7 +15,9 @@ module.exports = (sequelize) =>
       distributorStatus: { type: DataTypes.ENUM('active', 'banned'), defaultValue: 'active' },
       // 提现实名（M3 使用），加密存储
       realName: { type: DataTypes.STRING(64), allowNull: true },
-      idCardNoEnc: { type: DataTypes.STRING(256), allowNull: true }
+      idCardNoEnc: { type: DataTypes.STRING(256), allowNull: true },
+      // 退款追偿欠款（分）：已提现佣金被冲销时累计，提现可用额 = 可提现佣金 - 欠款（PRD §3.3）
+      debtCents: { type: DataTypes.BIGINT.UNSIGNED, defaultValue: 0 }
     },
     {
       tableName: 'users',

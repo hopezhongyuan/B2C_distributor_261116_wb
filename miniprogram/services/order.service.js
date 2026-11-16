@@ -50,4 +50,12 @@ function confirmOrder(orderId) {
   }));
 }
 
-module.exports = { createOrder, payOrder, listOrders, getOrderDetail, confirmOrder, genClientOrderId };
+/** 申请退款（契约 §退款）：amountCents 分，reason 原因 */
+function applyRefund(orderId, amountCents, reason) {
+  return ensureLogin().then(() => request({
+    url: '/orders/' + orderId + '/refund', method: 'POST',
+    data: { amountCents, reason }
+  }));
+}
+
+module.exports = { createOrder, payOrder, listOrders, getOrderDetail, confirmOrder, applyRefund, genClientOrderId };

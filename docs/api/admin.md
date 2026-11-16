@@ -271,6 +271,27 @@
 
 权限：读=全部登录管理员。
 
-## 13. M4 预留（后续迭代）
+## 13. 退款审核（批次 A）
 
-RBAC 细粒度权限点、操作审计表、Redis 登录限流、数据看板、退款处理（依赖 M3 退款链路）。
+### GET /admin/refunds?status=&page=&pageSize=
+
+| 字段 | 说明 |
+|---|---|
+| status | PENDING/APPROVED/REFUNDED/REJECTED/FAILED，缺省全部 |
+| list[] | refundNo、amountCents、reason、status、auditNote、createdAt + order{orderNo, payableCents, type, status} |
+
+### POST /admin/refunds/:id/audit
+
+**请求**：`{ approve: boolean, note?: string(≤128) }`
+**行为**：`approve=false` → REJECTED + 订单回审核前状态；`approve=true` → 调微信 `/v3/refund/domestic/refunds` 原路退回，受理成功转 APPROVED，资金落账以回调/查证 job 为准。微信受理失败自动回退 PENDING 并返回错误。
+**权限**：读=全部；审核/打款=super+finance（资金红线与提现同级）。
+
+### POST /admin/refunds/:id/retry
+
+APPROVED 状态重试打款（同 refundNo 幂等）。权限同上。
+
+**冲销规则**（PRD §3.3，实现在 refund.calc + commission.service）：全额退 → FROZEN/AVAILABLE 佣金 VOID；部分退 → 按退款比例扣减（四舍五入到分）；WITHDRAWING/PAID 佣金 → 计入受益人 debt_cents 欠款，提现冻结直至还清。全额退实物订单归还库存。
+
+## 14. 预留（后续迭代）
+
+RBAC 细粒度权限点、操作审计表、Redis 登录限流。

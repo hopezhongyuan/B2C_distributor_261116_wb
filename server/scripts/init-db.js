@@ -139,7 +139,36 @@ CREATE TABLE IF NOT EXISTS idempotency_keys (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS refunds (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id BIGINT UNSIGNED NOT NULL,
+  refund_no VARCHAR(32) NOT NULL UNIQUE,
+  user_id BIGINT UNSIGNED NOT NULL,
+  amount_cents BIGINT UNSIGNED NOT NULL,
+  reason VARCHAR(128) NOT NULL DEFAULT '',
+  pre_status ENUM('PAID','DELIVERED','COMPLETED') NOT NULL,
+  status ENUM('PENDING','APPROVED','REFUNDED','REJECTED','FAILED') NOT NULL DEFAULT 'PENDING',
+  audit_admin_id BIGINT UNSIGNED NULL,
+  audit_time DATETIME NULL,
+  audit_note VARCHAR(128) NOT NULL DEFAULT '',
+  wx_refund_id VARCHAR(64) NULL,
+  refund_time DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_refunds_order (order_id),
+  KEY idx_refunds_user (user_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
+
+// 既有表补列（幂等：information_schema 判断）——users.debt_cents 退款追偿欠款
+const MIGRATIONS = [
+  [
+    'users',
+    'debt_cents',
+    'ALTER TABLE users ADD COLUMN debt_cents BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT \'退款追偿欠款(分)\''
+  ]
+];
 
 // 种子配置（PRD 默认值；管理后台可改）
 const SEEDS = [
@@ -161,6 +190,14 @@ async function init() {
       'INSERT IGNORE INTO configs (`key`, `value`, `remark`) VALUES (?, ?, ?)',
       { replacements: [key, JSON.stringify(value), remark] }
     );
+  }
+  for (const [table, column, ddl] of MIGRATIONS) {
+    const [rows] = await sequelize.query(
+      `SELECT COUNT(*) AS n FROM information_schema.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+      { replacements: [table, column] }
+    );
+    if (!rows[0].n) await sequelize.query(ddl);
   }
   console.log('init-db: schema + seeds ok');
   await sequelize.close();

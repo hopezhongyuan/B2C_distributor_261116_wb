@@ -52,4 +52,5 @@ async function assertConnection() {
   await sequelize.authenticate();
 }
 
-module.exports = { sequelize, assertConnection, ...db };
+// Sequelize 类一并导出：多个 service 从本模块解构 Sequelize 使用（fn/col/transaction），避免各处重复 require
+module.exports = { sequelize, assertConnection, Sequelize, ...db };

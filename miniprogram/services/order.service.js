@@ -7,13 +7,14 @@ function genClientOrderId() {
 }
 
 /**
- * 创建订单；physical 需 receiverInfo，virtual 单品下单
+ * 创建订单；items 数组（购物车批量结算实物）；physical 需 receiverInfo；virtual 单品下单
  */
-function createOrder({ productId, quantity = 1, receiverInfo }) {
+function createOrder({ items, productId, quantity = 1, receiverInfo }) {
+  const orderItems = Array.isArray(items) ? items : [{ productId, quantity }];
   return ensureLogin().then(() => request({
     url: '/orders',
     method: 'POST',
-    data: { items: [{ productId, quantity }], receiverInfo, clientOrderId: genClientOrderId() }
+    data: { items: orderItems, receiverInfo, clientOrderId: genClientOrderId() }
   }));
 }
 

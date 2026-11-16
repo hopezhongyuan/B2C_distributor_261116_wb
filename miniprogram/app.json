@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/home/home",
+    "pages/cart/cart",
     "pages/product-list/product-list",
     "pages/product-detail/product-detail",
     "pages/checkout/checkout",

@@ -26,6 +26,7 @@
 
   <view class="foot-bar">
     <button class="share-btn" open-type="share">分享</button>
+    <view wx:if="{{product.type === 'physical'}}" class="cart-add" bindtap="addCart">加入购物车</view>
     <view class="qty">
       <view class="qty-btn" bindtap="onQuantityChange" data-type="dec">−</view>
       <view class="qty-num">{{quantity}}</view>

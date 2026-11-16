@@ -1,0 +1,44 @@
+<view wx:if="{{!loading && items.length === 0}}" class="empty-box">
+  购物车还是空的
+  <view class="btn-go-home" bindtap="goHome">去逛逛</view>
+</view>
+
+<block wx:elif="{{items.length > 0}}">
+  <view class="cart-list">
+    <view class="cart-item {{item.invalid || item.oversold ? 'item-disabled' : ''}}" wx:for="{{items}}" wx:key="productId">
+      <view class="check {{item.checked ? 'checked' : ''}}" bindtap="toggleItem" data-id="{{item.productId}}">✓</view>
+      <image class="cover" src="{{item.cover}}" mode="aspectFill" bindtap="goDetail" data-id="{{item.productId}}" />
+      <view class="info">
+        <view class="title" bindtap="goDetail" data-id="{{item.productId}}">{{item.title}}</view>
+        <view wx:if="{{item.invalid}}" class="warn">已下架</view>
+        <view wx:elif="{{item.oversold}}" class="warn">库存不足（仅剩 {{item.stock}} 件）</view>
+        <view class="foot">
+          <view class="price-wrap">
+            <text class="price-unit">¥</text>
+            <text class="price-text">{{item.price.yuan}}</text>
+            <text class="price-unit">.{{item.price.dec}}</text>
+          </view>
+          <view class="qty">
+            <view class="qty-btn" bindtap="onQty" data-id="{{item.productId}}" data-type="dec">−</view>
+            <view class="qty-num">{{item.quantity}}</view>
+            <view class="qty-btn" bindtap="onQty" data-id="{{item.productId}}" data-type="inc">＋</view>
+          </view>
+        </view>
+      </view>
+      <view class="del" bindtap="onRemove" data-id="{{item.productId}}">删除</view>
+    </view>
+  </view>
+
+  <view class="settle-bar">
+    <view class="check all {{allChecked ? 'checked' : ''}}" bindtap="toggleAll">✓</view>
+    <text class="all-label">全选</text>
+    <view class="total">
+      <text>合计：</text>
+      <text class="price-unit">¥</text>
+      <text class="total-num">{{totalText}}</text>
+    </view>
+    <view class="btn-primary settle-btn {{checkedCount === 0 ? 'btn-disabled' : ''}}" bindtap="checkout">
+      结算{{checkedCount > 0 ? '(' + checkedCount + ')' : ''}}
+    </view>
+  </view>
+</block>

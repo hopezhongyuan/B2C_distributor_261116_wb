@@ -12,7 +12,7 @@ function clampInt(v, min, max, dft) {
 async function list(req, res) {
   const page = clampInt(req.query.page, 1, 100000, 1);
   const pageSize = clampInt(req.query.pageSize, 1, 50, 10);
-  return ok(res, await productService.list({ page, pageSize, type: req.query.type }));
+  return ok(res, await productService.list({ page, pageSize, type: req.query.type, ids: req.query.ids }));
 }
 
 async function detail(req, res) {

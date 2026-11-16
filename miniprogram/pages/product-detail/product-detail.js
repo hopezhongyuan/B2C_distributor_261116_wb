@@ -1,5 +1,6 @@
 // 商品详情：实物/虚拟双模板（底部按钮与提示按类型切换）
 const productService = require('../../services/product.service');
+const cart = require('../../utils/cart');
 const { fenToParts, toImageUrl } = require('../../utils/format');
 
 Page({
@@ -50,6 +51,21 @@ Page({
     wx.navigateTo({
       url: `/pages/checkout/checkout?productId=${product.id}&quantity=${quantity}`
     });
+  },
+
+  // 仅实物提供加入购物车（虚拟服务需单独报名，决策记录 #12）
+  addCart() {
+    const { product, quantity } = this.data;
+    if (!product || product.stock < quantity) {
+      wx.showToast({ title: '库存不足', icon: 'none' });
+      return;
+    }
+    cart.add(product.id, quantity);
+    wx.showToast({ title: '已加入购物车', icon: 'success' });
+  },
+
+  goCart() {
+    wx.navigateTo({ url: '/pages/cart/cart' });
   },
 
   onShareAppMessage() {

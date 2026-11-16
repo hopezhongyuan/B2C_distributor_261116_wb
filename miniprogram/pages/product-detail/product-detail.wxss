@@ -99,6 +99,19 @@
   font-size: var(--font-body);
 }
 
+.cart-add {
+  width: 160rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  margin-left: var(--space-sm);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-caption);
+  flex-shrink: 0;
+}
+
 .foot-buy {
   flex: 1;
   margin-left: var(--space-md);

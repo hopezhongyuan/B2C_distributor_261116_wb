@@ -23,6 +23,7 @@
 | page | number | 否 | ≥1，默认 1 |
 | pageSize | number | 否 | 1–50，默认 10 |
 | type | string | 否 | `physical` / `virtual` |
+| ids | string | 否 | 逗号分隔商品 id（如 `1,3,5`，最多 20 个）；传入时忽略分页与 type，按 ids 顺序返回（购物车批量结算用，M1.14 增） |
 
 **出参 data**
 

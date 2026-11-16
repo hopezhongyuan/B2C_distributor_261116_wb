@@ -1,9 +1,18 @@
 // product.service — 小程序端商品读接口（仅 status='on' 可见）
+const { Op } = require('sequelize');
 const { Product } = require('../models');
 const ERRORS = require('../config/errors');
 
-async function list({ page = 1, pageSize = 10, type }) {
+async function list({ page = 1, pageSize = 10, type, ids }) {
   const where = { status: 'on' };
+  // ids 批量查询（购物车结算）：忽略分页与 type，按传入顺序返回
+  if (ids) {
+    const idArr = String(ids).split(',').map((s) => parseInt(s, 10)).filter(Number.isInteger).slice(0, 20);
+    if (!idArr.length) return { list: [], total: 0, page: 1, pageSize: idArr.length };
+    const rows = await Product.findAll({ where: { status: 'on', id: { [Op.in]: idArr } } });
+    const map = new Map(rows.map((r) => [r.id, r]));
+    return { list: idArr.map((id) => map.get(id)).filter(Boolean), total: idArr.length, page: 1, pageSize: idArr.length };
+  }
   if (type === 'physical' || type === 'virtual') where.type = type;
   const { rows, count } = await Product.findAndCountAll({
     where,

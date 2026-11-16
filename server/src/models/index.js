@@ -52,5 +52,6 @@ async function assertConnection() {
   await sequelize.authenticate();
 }
 
-// Sequelize 类一并导出：多个 service 从本模块解构 Sequelize 使用（fn/col/transaction），避免各处重复 require
-module.exports = { sequelize, assertConnection, Sequelize, ...db };
+// Sequelize 类与 Op 一并导出：多个 service 从本模块解构使用（fn/col/transaction/Op），避免各处重复 require
+const { Op } = Sequelize;
+module.exports = { sequelize, assertConnection, Sequelize, Op, ...db };

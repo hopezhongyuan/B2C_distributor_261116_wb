@@ -11,8 +11,14 @@
       </t-card>
     </div>
 
-    <t-card title="佣金明细" bordered style="margin-top: 16px">
-      <template #actions>
+    <t-card bordered style="margin-top: 16px">
+      <template #title>
+        <t-radio-group v-model="viewMode" variant="default-filled" @change="onModeChange">
+          <t-radio-button value="detail">佣金明细</t-radio-button>
+          <t-radio-button value="byOrder">按订单结算批次</t-radio-button>
+        </t-radio-group>
+      </template>
+      <template v-if="viewMode === 'detail'" #actions>
         <t-select v-model="status" clearable style="width: 150px" placeholder="全部状态" @change="load(1)">
           <t-option v-for="(label, key) in STATUS" :key="key" :value="key" :label="label" />
         </t-select>
@@ -21,8 +27,9 @@
         <t-button style="margin-left: 8px" @click="load(1)">查询</t-button>
         <t-button variant="outline" style="margin-left: 8px" @click="loadSummary">刷新汇总</t-button>
       </template>
-      <t-table :loading="loading" :columns="columns" :data="rows" row-key="commissionId" :pagination="pagination"
-        @page-change="onPage">
+
+      <t-table v-if="viewMode === 'detail'" :loading="loading" :columns="columns" :data="rows" row-key="commissionId"
+        :pagination="pagination" @page-change="onPage">
         <template #level="{ row }">
           <t-tag :theme="row.level === 1 ? 'primary' : 'warning'" variant="light" size="small">
             {{ row.level === 1 ? '一级' : '二级' }}
@@ -34,6 +41,15 @@
           <t-tag :theme="TAG_THEME[row.status] || 'default'">{{ STATUS[row.status] || row.status }}</t-tag>
         </template>
         <template #settleTime="{ row }">{{ row.settleTime ? fmtTime(row.settleTime) : '—' }}</template>
+        <template #createdAt="{ row }">{{ fmtTime(row.createdAt) }}</template>
+      </t-table>
+
+      <t-table v-else :loading="batchLoading" :columns="batchColumns" :data="batchRows" row-key="orderId"
+        :pagination="batchPagination" @page-change="onBatchPage">
+        <template #payable="{ row }">¥{{ (row.payableCents / 100).toFixed(2) }}</template>
+        <template #total="{ row }">¥{{ (row.totalCents / 100).toFixed(2) }}</template>
+        <template #paid="{ row }">¥{{ (row.paidCents / 100).toFixed(2) }}</template>
+        <template #void="{ row }">{{ row.voidCents ? '¥' + (row.voidCents / 100).toFixed(2) : '—' }}</template>
         <template #createdAt="{ row }">{{ fmtTime(row.createdAt) }}</template>
       </t-table>
     </t-card>
@@ -110,6 +126,43 @@ async function load(page = 1) {
 
 function onPage(info) {
   load(info.current);
+}
+
+// —— 按订单结算批次视图（批次D） ——
+const viewMode = ref('detail');
+const batchLoading = ref(false);
+const batchRows = ref([]);
+const batchPagination = reactive({ current: 1, pageSize: 20, total: 0 });
+const batchColumns = [
+  { colKey: 'orderNo', title: '订单号', width: 220 },
+  { colKey: 'payable', title: '订单实付', width: 100 },
+  { colKey: 'count', title: '佣金笔数', width: 90 },
+  { colKey: 'total', title: '佣金总额', width: 100 },
+  { colKey: 'paid', title: '已结算', width: 100 },
+  { colKey: 'void', title: '已作废(冲销)', width: 110 },
+  { colKey: 'createdAt', title: '首笔产生时间', width: 170 }
+];
+
+async function loadBatch(page = 1) {
+  batchLoading.value = true;
+  try {
+    const data = await http.get('/admin/commissions/by-order', { params: { page, pageSize: 20 } });
+    batchRows.value = data.list;
+    batchPagination.current = data.page;
+    batchPagination.total = data.total;
+  } catch (e) {
+    MessagePlugin.error(e.msg || '加载失败');
+  } finally {
+    batchLoading.value = false;
+  }
+}
+
+function onBatchPage(info) {
+  loadBatch(info.current);
+}
+
+function onModeChange(mode) {
+  if (mode === 'byOrder' && !batchRows.value.length) loadBatch();
 }
 
 onMounted(() => {

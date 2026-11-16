@@ -36,8 +36,9 @@ router.get('/distributors/:id/detail', requireAdmin, asyncHandler(ctrl.distribut
 router.post('/distributors/:id/status', requireAdmin, requireRole(OPS), asyncHandler(ctrl.distributorStatus));
 router.get('/relations', requireAdmin, asyncHandler(ctrl.relationList));
 
-// 佣金管理（M4 尾项，只读总览）
+// 佣金管理（M4 尾项，只读总览；批次D 增按订单结算批次视图）
 router.get('/commissions/summary', requireAdmin, asyncHandler(ctrl.commissionSummary));
+router.get('/commissions/by-order', requireAdmin, asyncHandler(ctrl.commissionByOrder));
 router.get('/commissions', requireAdmin, asyncHandler(ctrl.commissionList));
 
 // 数据看板（M4 收官，只读）

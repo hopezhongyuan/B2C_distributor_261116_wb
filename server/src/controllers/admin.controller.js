@@ -87,6 +87,9 @@ async function commissionSummary(req, res) {
 async function commissionList(req, res) {
   return ok(res, await commissionAdmin.list({ status: req.query.status, keyword: req.query.keyword, ...pageArgs(req) }));
 }
+async function commissionByOrder(req, res) {
+  return ok(res, await commissionAdmin.listByOrder(pageArgs(req)));
+}
 
 // —— 数据看板（只读，M4 收官） ——
 async function dashboard(req, res) {
@@ -119,7 +122,7 @@ module.exports = {
   login, withdrawList, withdrawReview, withdrawSync,
   productList, productCreate, productUpdate, productStatus,
   orderList, orderRedeem, distributorList, distributorStatus, distributorDetail, relationList,
-  commissionSummary, commissionList, dashboard,
+  commissionSummary, commissionList, commissionByOrder, dashboard,
   refundList, refundAudit, refundRetry,
   configList, configUpdate
 };

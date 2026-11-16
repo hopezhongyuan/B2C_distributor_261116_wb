@@ -80,4 +80,48 @@ async function list({ status, keyword, page = 1, pageSize = 20 }) {
   };
 }
 
-module.exports = { summary, list, normalizeStatus, buildWhere, STATUS_LIST };
+// 结算批次视图（批次D）：按订单聚合佣金流水（PRD「结算批次」口径=同单佣金组）
+async function listByOrder({ page = 1, pageSize = 20 }) {
+  const rows = await Commission.findAll({
+    attributes: [
+      'orderId',
+      [Sequelize.fn('COUNT', '*'), 'count'],
+      [Sequelize.fn('SUM', Sequelize.col('amount_cents')), 'totalCents'],
+      [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN status = 'PAID' THEN amount_cents ELSE 0 END")), 'paidCents'],
+      [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN status = 'VOID' THEN amount_cents ELSE 0 END")), 'voidCents'],
+      [Sequelize.fn('MIN', Sequelize.col('created_at')), 'createdAt']
+    ],
+    group: ['orderId'],
+    order: [[Sequelize.literal('MIN(created_at)'), 'DESC']],
+    offset: (page - 1) * pageSize,
+    limit: pageSize,
+    raw: true
+  });
+  const [countRow] = await Commission.findAll({
+    attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('order_id'))), 'cnt']],
+    raw: true
+  });
+  const orderIds = rows.map((r) => r.orderId);
+  const orders = orderIds.length
+    ? await Order.findAll({ where: { id: { [Op.in]: orderIds } }, attributes: ['id', 'orderNo', 'payableCents', 'status'], raw: true })
+    : [];
+  const omap = new Map(orders.map((o) => [o.id, o]));
+  return {
+    total: Number(countRow.cnt) || 0,
+    list: rows.map((r) => ({
+      orderId: r.orderId,
+      orderNo: (omap.get(r.orderId) || {}).orderNo || String(r.orderId),
+      orderStatus: (omap.get(r.orderId) || {}).status || '',
+      payableCents: (omap.get(r.orderId) || {}).payableCents || 0,
+      count: Number(r.count),
+      totalCents: Number(r.totalCents),
+      paidCents: Number(r.paidCents),
+      voidCents: Number(r.voidCents),
+      createdAt: r.createdAt
+    })),
+    page,
+    pageSize
+  };
+}
+
+module.exports = { summary, list, listByOrder, normalizeStatus, buildWhere, STATUS_LIST };

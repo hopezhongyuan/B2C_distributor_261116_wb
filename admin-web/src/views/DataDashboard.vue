@@ -46,6 +46,7 @@ import http from '../api/request';
 
 const data = reactive({
   gmvCents: 0, paidCount: 0, createdCount: 0, distributionCount: 0,
+  distributorCount: 0, inviterCount: 0,
   payRateBp: 0, distributionRateBp: 0,
   commissionPaidCents: 0, commissionTotalCents: 0, commissionCostBp: 0,
   funnel: [], trend: []
@@ -59,6 +60,7 @@ const kpis = computed(() => [
   { label: '有效支付订单', value: data.paidCount + ' 单', sub: `总下单 ${data.createdCount} 单` },
   { label: '支付转化率', value: pct(data.payRateBp) },
   { label: '分销订单占比', value: pct(data.distributionRateBp), sub: `分销成交 ${data.distributionCount} 单` },
+  { label: '分销员数', value: String(data.distributorCount ?? 0), sub: `已带单 ${data.inviterCount ?? 0} 人` },
   { label: '佣金支出比', value: pct(data.commissionCostBp), sub: `已结算 ${yuan(data.commissionPaidCents)} / 产生 ${yuan(data.commissionTotalCents)}` }
 ]);
 

@@ -1,6 +1,6 @@
 // dashboard.service.js — 数据看板（只读聚合，M4 收官项）
 // 契约：docs/api/admin.md §12；口径铁律见下，前端只做展示不做二次计算
-const { Order, Commission } = require('../models');
+const { Order, Commission, User } = require('../models');
 const { Op, Sequelize } = require('sequelize'); // 铁律：Op/Sequelize 从包取，models/index 不导出类
 
 // 有效支付口径：钱已实收且未全额退回（REFUNDING 仍计入——资金在途；REFUNDED 全退不计）
@@ -91,11 +91,18 @@ async function overview() {
   });
 
   const bp = (cur, base) => (base > 0 ? Math.round((cur / base) * 10000) : 0);
+  // 分销员数（PRD 看板指标）：active 用户数 + 有绑定关系去重邀请人数
+  const [activeCount, inviterCount] = await Promise.all([
+    User.count({ where: { distributorStatus: 'active' } }),
+    Commission.findAll({ attributes: [[Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('beneficiary_id'))), 'cnt']], raw: true })
+  ]);
   return {
     gmvCents,
     paidCount,
     createdCount,
     distributionCount,
+    distributorCount: activeCount,
+    inviterCount: Number(inviterCount[0].cnt) || 0,
     payRateBp: bp(paidCount, createdCount),
     distributionRateBp: bp(distributionCount, paidCount),
     commissionPaidCents,

@@ -303,3 +303,11 @@ RBAC 细粒度权限点、操作审计表、Redis 登录限流。
 ### GET /admin/relations?userId=&page=&pageSize=（批次C）
 
 绑定审计：invitee/inviter 昵称+ID、sourceScene、时间；userId 可选（查该用户作为任一方的全部绑定）。读=全部。
+
+### GET /admin/commissions/by-order?page=&pageSize=（批次D）
+
+结算批次视图：按订单聚合佣金（笔数/总额/已结算/已作废冲销/首笔产生时间）+ 订单号与实付。读=全部。
+
+### 看板补充字段（批次D）
+
+`GET /admin/dashboard` 新增 `distributorCount`（active 分销员数）、`inviterCount`（产生过佣金的去重受益人数）。

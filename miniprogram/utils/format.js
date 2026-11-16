@@ -1,4 +1,6 @@
 // 纯工具函数：格式化（禁浮点参与金额运算，仅展示层格式化）
+// 注意：小程序 require 不支持目录（无 Node 的目录→index 解析），必须写具体文件路径
+const { IMAGE_BASE_URL } = require('../config/index');
 /**
  * 分 → { yuan, dec } 结构化展示字段
  * @param {number} cents 金额（分，整数）
@@ -21,7 +23,6 @@ function fenToYuan(cents) {
 function toImageUrl(path) {
   if (!path) return '';
   if (/^https?:\/\//.test(path)) return path;
-  const { IMAGE_BASE_URL } = require('../config');
   return IMAGE_BASE_URL + (path.charAt(0) === '/' ? path : '/' + path);
 }
 

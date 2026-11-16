@@ -33,6 +33,9 @@ router.post('/distributors/:id/status', requireAdmin, requireRole(OPS), asyncHan
 router.get('/commissions/summary', requireAdmin, asyncHandler(ctrl.commissionSummary));
 router.get('/commissions', requireAdmin, asyncHandler(ctrl.commissionList));
 
+// 数据看板（M4 收官，只读）
+router.get('/dashboard', requireAdmin, asyncHandler(ctrl.dashboard));
+
 // 参数配置（M4）
 router.get('/configs', requireAdmin, asyncHandler(ctrl.configList));
 router.put('/configs/:key', requireAdmin, requireRole(OPS), asyncHandler(ctrl.configUpdate));

@@ -15,7 +15,7 @@ const routes = [
       { path: 'commissions', name: 'commissions', component: () => import('../views/CommissionManage.vue'), meta: { title: '佣金管理', module: 'commission' } },
       { path: 'withdrawals', name: 'withdrawals', component: () => import('../views/WithdrawAudit.vue'), meta: { title: '提现审核', module: 'withdraw' } },
       { path: 'configs', name: 'configs', component: () => import('../views/ConfigManage.vue'), meta: { title: '参数配置', module: 'config' } },
-      { path: 'dashboard', name: 'dashboard', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '数据看板', module: 'dashboard' } }
+      { path: 'dashboard', name: 'dashboard', component: () => import('../views/Dashboard.vue'), meta: { title: '数据看板', module: 'dashboard' } }
     ]
   }
 ];

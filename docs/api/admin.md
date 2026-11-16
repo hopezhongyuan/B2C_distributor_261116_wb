@@ -243,6 +243,34 @@
 
 权限：读=全部登录管理员。
 
-## 12. M4 预留（后续迭代）
+## 12. 数据看板（M4 收官，只读）
+
+`GET /api/admin/dashboard`
+
+无参数。口径铁律（前端只展示不二次计算）：
+
+- **GMV（有效支付）**：`status ∈ {PAID, DELIVERED, COMPLETED, REDEEMED, REFUNDING, PARTIAL_REFUNDED}` 的 `payable_cents` 之和。PENDING_PAY/CLOSED 未收款不计；REFUNDED（全额退）不计；REFUNDING 资金在途仍计。
+- **分销成交**：产生过佣金记录（含 VOID）的去重订单数，即关系链带单订单。
+- **佣金支出比**：`PAID`（实际已结算落袋）佣金 / GMV。
+
+响应 data：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| gmvCents | number | GMV（分，口径见上） |
+| createdCount | number | 全部下单数（含未支付/已关闭） |
+| paidCount | number | 有效支付订单数 |
+| payRateBp | number | 支付转化率（万分比，paid/created） |
+| distributionCount | number | 分销成交订单数 |
+| distributionRateBp | number | 分销订单占比（万分比，distribution/paid） |
+| commissionPaidCents | number | 已结算佣金（PAID，分） |
+| commissionTotalCents | number | 产生佣金总额（非 VOID，分） |
+| commissionCostBp | number | 佣金支出比（万分比，commissionPaid/gmv） |
+| funnel | array | 三级漏斗 `[{key,label,count,rate}]`：created→paid→distribution；rate=相对上一层转化率（%，除零为 0） |
+| trend | array | 近 14 天趋势（升序含补零日）：`[{day, gmvCents, paidCount}]`，按 `pay_time` 归日 |
+
+权限：读=全部登录管理员。
+
+## 13. M4 预留（后续迭代）
 
 RBAC 细粒度权限点、操作审计表、Redis 登录限流、数据看板、退款处理（依赖 M3 退款链路）。

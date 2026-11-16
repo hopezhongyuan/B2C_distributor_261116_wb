@@ -114,6 +114,89 @@
 
 `node scripts/create-admin.js <username> <password> [role]` —— 幂等 upsert，仅 super 可建新管理员（首个管理员由服务器脚本创建）。
 
-## 7. M4 预留（本期不实现）
+## 7. 商品管理（M4）
 
-商品管理、订单管理、核销操作、RBAC 细化、操作审计表、Redis 登录限流。
+> 校验红线：佣金比例 bp ∈ [0,5000]（≤50%）；价格 priceCents 为正整数分；虚拟商品可无库存限制（stock 忽略）。
+
+`GET /api/admin/products`（全状态含 draft/off）
+
+| 字段 | 类型 | 必填 | 校验规则 |
+|---|---|---|---|
+| type | string | 否 | physical / virtual |
+| status | string | 否 | draft / on / off |
+| page / pageSize | number | 否 | 同通用约定 |
+
+`POST /api/admin/products`（创建）
+
+| 字段 | 类型 | 必填 | 校验规则 |
+|---|---|---|---|
+| title | string | 是 | 1–128 字符 |
+| type | string | 是 | physical / virtual |
+| priceCents | number | 是 | 正整数分 |
+| stock | number | 否 | ≥0，默认 0（physical 必填） |
+| rateL1Bp / rateL2Bp | number | 是 | 0–5000（基点） |
+| images | string[] | 否 | 相对路径数组，≤9 张 |
+| coverImage | string | 否 | 相对路径 |
+| detail | string | 否 | 富文本/纯文本 |
+| virtualConfig | object | 否 | 虚拟商品配置（核销说明等） |
+
+`PUT /api/admin/products/:id`（编辑，字段可选同上）；`POST /api/admin/products/:id/status`
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| status | string | 是 | draft / on / off（上架前置校验：实物 stock>0、比例已配置） |
+
+权限：读=全部管理员；写=super/ops。错误：`1001` 校验失败 · `2001` 商品不存在。
+
+## 8. 订单管理（M4）
+
+`GET /api/admin/orders`
+
+| 字段 | 类型 | 必填 | 校验规则 |
+|---|---|---|---|
+| status | string | 否 | PENDING_PAY/PAID/REDEEMED/COMPLETED/CLOSED/REFUNDED |
+| orderNo | string | 否 | 精确匹配 |
+| page / pageSize | number | 否 | 同通用约定 |
+
+响应 list[]：订单头（orderNo/status/type/amountCents/payTime/买家昵称脱敏）+ items[]（商品快照）。
+
+`POST /api/admin/orders/:id/redeem`（核销，自 M1 临时 token 通道迁移至 RBAC）
+
+- 语义与错误码同 order.md redeem：仅 virtual + PAID 可核销（`3002`），PAID→REDEEMED，**佣金直接 AVAILABLE**
+- 权限：super/ops
+- 核销成功返回 `{ orderId, status: 'REDEEMED' }`
+
+## 9. 分销员管理（M4）
+
+`GET /api/admin/distributors`
+
+| 字段 | 类型 | 必填 | 校验规则 |
+|---|---|---|---|
+| keyword | string | 否 | 昵称模糊 |
+| status | string | 否 | active / banned |
+| page / pageSize | number | 否 | 同通用约定 |
+
+响应 list[]：userId/nickname/inviterId/distributorStatus/直邀数/累计佣金（各状态 SUM）/createdAt。
+
+`POST /api/admin/distributors/:id/status`
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| status | string | 是 | active（解封）/ banned（封禁：不再计新佣金，FROZEN 冻结保留待裁决，architecture §4.2） |
+
+权限：读=全部；封禁/解封=super/ops。
+
+## 10. 参数配置（M4）
+
+`GET /api/admin/configs` —— 全量 `{ key, value, description }` 列表。
+`PUT /api/admin/configs/:key`
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| value | string | 是 | 新值；key 必须在白名单（如 withdraw_min_cents），非法 key 返回 `1001` |
+
+权限：读=全部；写=super/super+ops（super/ops）。修改即时生效（佣金计算经 getConfigMap 动态读取）。
+
+## 11. M4 预留（后续迭代）
+
+RBAC 细粒度权限点、操作审计表、Redis 登录限流、数据看板、退款处理（依赖 M3 退款链路）。

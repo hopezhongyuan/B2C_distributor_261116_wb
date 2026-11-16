@@ -1,12 +1,36 @@
-// admin 路由（契约：docs/api/admin.md）；审核/打款限 super+finance
+// admin 路由（契约：docs/api/admin.md）
+// 读操作=全部登录管理员；写操作按角色：商品/订单/分销员/参数=super+ops，提现审核打款=super+finance
 const router = require('express').Router();
 const ctrl = require('../controllers/admin.controller');
 const { requireAdmin, requireRole } = require('../middlewares/auth');
 const asyncHandler = require('../middlewares/asyncHandler');
 
+const OPS = ['super', 'ops'];
+const FIN = ['super', 'finance'];
+
 router.post('/login', asyncHandler(ctrl.login));
+
+// 提现审核（M3.4）
 router.get('/withdraws', requireAdmin, asyncHandler(ctrl.withdrawList));
-router.post('/withdraws/:id/review', requireAdmin, requireRole(['super', 'finance']), asyncHandler(ctrl.withdrawReview));
-router.post('/withdraws/:id/sync', requireAdmin, requireRole(['super', 'finance']), asyncHandler(ctrl.withdrawSync));
+router.post('/withdraws/:id/review', requireAdmin, requireRole(FIN), asyncHandler(ctrl.withdrawReview));
+router.post('/withdraws/:id/sync', requireAdmin, requireRole(FIN), asyncHandler(ctrl.withdrawSync));
+
+// 商品管理（M4）
+router.get('/products', requireAdmin, asyncHandler(ctrl.productList));
+router.post('/products', requireAdmin, requireRole(OPS), asyncHandler(ctrl.productCreate));
+router.put('/products/:id', requireAdmin, requireRole(OPS), asyncHandler(ctrl.productUpdate));
+router.post('/products/:id/status', requireAdmin, requireRole(OPS), asyncHandler(ctrl.productStatus));
+
+// 订单管理（M4）
+router.get('/orders', requireAdmin, asyncHandler(ctrl.orderList));
+router.post('/orders/:id/redeem', requireAdmin, requireRole(OPS), asyncHandler(ctrl.orderRedeem));
+
+// 分销员管理（M4）
+router.get('/distributors', requireAdmin, asyncHandler(ctrl.distributorList));
+router.post('/distributors/:id/status', requireAdmin, requireRole(OPS), asyncHandler(ctrl.distributorStatus));
+
+// 参数配置（M4）
+router.get('/configs', requireAdmin, asyncHandler(ctrl.configList));
+router.put('/configs/:key', requireAdmin, requireRole(OPS), asyncHandler(ctrl.configUpdate));
 
 module.exports = router;

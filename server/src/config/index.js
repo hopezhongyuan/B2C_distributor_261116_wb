@@ -50,7 +50,5 @@ module.exports = {
     publicKeyId: process.env.WXPAY_PUBLIC_KEY_ID || ''
   },
 
-  uploadDir: process.env.UPLOAD_DIR || 'uploads',
-  // 核销等管理操作的临时 token（M4 换 RBAC 后移除）
-  adminApiToken: process.env.ADMIN_API_TOKEN || ''
+  uploadDir: process.env.UPLOAD_DIR || 'uploads'
 };

@@ -14,7 +14,7 @@
 | 订单列表 | GET | `/api/orders` | 用户 JWT |
 | 订单详情 | GET | `/api/orders/:id` | 用户 JWT（且为订单属主） |
 | 确认收货（实物） | POST | `/api/orders/:id/confirm` | 用户 JWT（且为订单属主） |
-| 虚拟服务核销 | POST | `/api/orders/:id/redeem` | 管理员 RBAC（M1 由 admin 通道） |
+| 虚拟服务核销 | POST | `/api/admin/orders/:id/redeem` | 管理员 RBAC（super/ops，docs/api/admin.md §8） |
 
 ## POST /api/orders
 

@@ -7,7 +7,7 @@ const path = require('path');
 
 const { sequelize, Product } = require('../src/models');
 
-const UPLOAD_SUBDIR = 'products';
+const UPLOAD_SUBDIR = 'products'; // 物理路径 uploads/products/；库内相对路径带 /uploads 前缀（architecture §3）
 const ASSETS = path.join(__dirname, 'assets');
 
 const SEEDS = [
@@ -16,7 +16,8 @@ const SEEDS = [
     type: 'physical',
     priceCents: 9900,
     stock: 50,
-    coverImage: `/${UPLOAD_SUBDIR}/cover-physical.png`,
+    coverImage: `/uploads/${UPLOAD_SUBDIR}/cover-physical.png`,
+    images: [`/uploads/${UPLOAD_SUBDIR}/cover-physical.png`],
     detail:
       '初中全科同步学案礼盒，含语数英物化五科要点手册与配套练习册。\n\n· 实物商品，全国包邮\n· 支持签收后 7 天无理由退换（售后期内佣金冻结）'
   },
@@ -25,7 +26,8 @@ const SEEDS = [
     type: 'virtual',
     priceCents: 990,
     stock: 999,
-    coverImage: `/${UPLOAD_SUBDIR}/cover-virtual.png`,
+    coverImage: `/uploads/${UPLOAD_SUBDIR}/cover-virtual.png`,
+    images: [`/uploads/${UPLOAD_SUBDIR}/cover-virtual.png`],
     virtualConfig: {
       redeemNote: '购买成功后请添加班主任微信预约上课时间，核销后不可退款',
       sessionMinutes: 45

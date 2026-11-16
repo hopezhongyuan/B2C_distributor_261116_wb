@@ -2,7 +2,7 @@
 <view wx:elif="{{error}}" class="empty-box">{{error}}</view>
 
 <block wx:elif="{{product}}">
-  <image class="hero" src="{{product.images[0] || product.coverImage}}" mode="aspectFill" />
+  <image class="hero" src="{{product.images[0] || product.cover}}" mode="aspectFill" />
 
   <view class="card">
     <view class="price-line">

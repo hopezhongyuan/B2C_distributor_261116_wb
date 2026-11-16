@@ -51,6 +51,15 @@ Page({
   },
 
   goDetail(e) {
-    wx.navigateTo({ url: '/pages/product-detail/product-detail?id=' + e.currentTarget.dataset.id });
+    const id = e.currentTarget.dataset.id;
+    console.log('[home] goDetail id =', id);
+    wx.navigateTo({
+      url: '/pages/product-detail/product-detail?id=' + id,
+      fail: (err) => {
+        // 跳转失败不再静默：Toast + Console 双通道暴露原因
+        console.error('[home] navigateTo fail:', err);
+        wx.showToast({ title: err && err.errMsg ? err.errMsg : '跳转失败', icon: 'none' });
+      }
+    });
   }
 });

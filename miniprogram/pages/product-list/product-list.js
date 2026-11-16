@@ -1,6 +1,6 @@
 // 商品列表：全量 + 类型筛选 + 分页加载
 const productService = require('../../services/product.service');
-const { fenToParts } = require('../../utils/format');
+const { fenToParts, toImageUrl } = require('../../utils/format');
 
 const TYPES = [
   { key: '', label: '全部' },
@@ -9,7 +9,7 @@ const TYPES = [
 ];
 
 function decorate(p) {
-  return { ...p, price: fenToParts(p.priceCents) };
+  return { ...p, price: fenToParts(p.priceCents), coverImage: toImageUrl(p.coverImage) };
 }
 
 Page({

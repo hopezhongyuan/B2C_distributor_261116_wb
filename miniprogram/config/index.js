@@ -2,6 +2,8 @@
 module.exports = {
   // API 基址：已备案域名（小程序后台需配置为 request 合法域名）
   API_BASE_URL: 'https://test2.aition.art/api',
+  // 静态资源（商品图）基址：接口返回相对路径（/uploads/...），展示层拼接完整 URL
+  IMAGE_BASE_URL: 'https://test2.aition.art',
 
   VERSION: '0.1.0'
 };

@@ -1,6 +1,6 @@
 // 首页：精选商品（首批）+ 入口
 const productService = require('../../services/product.service');
-const { fenToParts, fenToYuan } = require('../../utils/format');
+const { fenToParts, fenToYuan, toImageUrl } = require('../../utils/format');
 
 Page({
   data: {
@@ -26,7 +26,7 @@ Page({
           id: p.id,
           title: p.title,
           type: p.type,
-          coverImage: p.coverImage,
+          coverImage: toImageUrl(p.coverImage),
           stock: p.stock,
           price: fenToParts(p.priceCents),
           priceText: fenToYuan(p.priceCents)

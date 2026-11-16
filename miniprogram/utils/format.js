@@ -17,6 +17,14 @@ function fenToYuan(cents) {
   return p.yuan + '.' + p.dec;
 }
 
+/** 相对路径 → 完整图片 URL（契约 product.md：接口返回相对路径，前端拼域名） */
+function toImageUrl(path) {
+  if (!path) return '';
+  if (/^https?:\/\//.test(path)) return path;
+  const { IMAGE_BASE_URL } = require('../config');
+  return IMAGE_BASE_URL + (path.charAt(0) === '/' ? path : '/' + path);
+}
+
 /** 状态码 → 中文文案（订单状态机，architecture §4.1） */
 const ORDER_STATUS_TEXT = {
   PENDING_PAY: '待付款',
@@ -34,4 +42,4 @@ function orderStatusText(status) {
   return ORDER_STATUS_TEXT[status] || status;
 }
 
-module.exports = { fenToParts, fenToYuan, orderStatusText, ORDER_STATUS_TEXT };
+module.exports = { fenToParts, fenToYuan, orderStatusText, ORDER_STATUS_TEXT, toImageUrl };

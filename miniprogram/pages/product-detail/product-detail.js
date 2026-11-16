@@ -1,6 +1,6 @@
 // 商品详情：实物/虚拟双模板（底部按钮与提示按类型切换）
 const productService = require('../../services/product.service');
-const { fenToParts } = require('../../utils/format');
+const { fenToParts, toImageUrl } = require('../../utils/format');
 
 Page({
   data: {
@@ -22,7 +22,12 @@ Page({
       .then((p) => {
         this.setData({
           loading: false,
-          product: { ...p, price: fenToParts(p.priceCents) }
+          product: {
+            ...p,
+            price: fenToParts(p.priceCents),
+            cover: toImageUrl((p.images && p.images[0]) || ''),
+            images: (p.images || []).map(toImageUrl)
+          }
         });
         wx.setNavigationBarTitle({ title: p.title.slice(0, 12) });
       })

@@ -28,7 +28,8 @@ module.exports = {
 
   wx: {
     appid: process.env.WX_APPID || '',
-    secret: required('WX_SECRET')
+    // M0 部署时允许为空（auth 模块 M1 接入），生产缺失时仅告警
+    secret: process.env.WX_SECRET || ''
   },
 
   wxpay: {

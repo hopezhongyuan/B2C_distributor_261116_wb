@@ -8,7 +8,7 @@
     "start": "node src/app.js",
     "dev": "node --watch src/app.js",
     "lint": "eslint src --ext .js",
-    "test": "echo \"tests land in M0.4\" && exit 0"
+    "test": "node --test"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

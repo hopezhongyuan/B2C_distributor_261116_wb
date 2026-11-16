@@ -14,7 +14,7 @@
       <t-card title="成交漏斗" bordered class="panel">
         <div class="funnel">
           <div v-for="s in data.funnel" :key="s.key" class="funnel-step">
-            <div class="funnel-bar" :style="{ width: barWidth(s.count) + '%' }">
+            <div class="funnel-bar" :class="'lv' + s.key" :style="{ width: barWidth(s.count) + '%' }">
               <span>{{ s.label }} · {{ s.count }}</span>
             </div>
             <div class="funnel-rate">较上级 {{ s.rate }}%</div>
@@ -31,8 +31,7 @@
             <div class="trend-bar-wrap">
               <div class="trend-bar" :style="{ height: trendHeight(d.gmvCents) + '%' }"></div>
             </div>
-            <div class="trend-day">{{ d.day.slice(5) }}</div>
-            <div class="trend-count">{{ d.paidCount }}单</div>
+            <div class="trend-day">{{ d.day.slice(5) }} · {{ d.paidCount }}单</div>
           </div>
         </div>
       </t-card>
@@ -75,10 +74,10 @@ function trendHeight(cents) {
 }
 function fmtShort(cents) {
   if (!cents) return '0';
-  return cents >= 100000000 ? (cents / 100000000).toFixed(1) + '亿'
-    : cents >= 1000000 ? (cents / 1000000).toFixed(1) + 'M'
-    : cents >= 10000 ? Math.round(cents / 10000) + 'W'
-    : String(cents);
+  if (cents >= 100000000) return (cents / 100000000).toFixed(1) + '亿';
+  if (cents >= 1000000) return (cents / 1000000).toFixed(1) + 'M';
+  if (cents >= 10000) return Math.round(cents / 10000) + 'W';
+  return String(cents);
 }
 
 async function load() {
@@ -93,114 +92,31 @@ onMounted(() => load());
 </script>
 
 <style scoped>
-.kpi-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.kpi-card {
-  flex: 1;
-  min-width: 170px;
-}
-.kpi-label {
-  color: #888;
-  font-size: 12px;
-}
-.kpi-value {
-  font-size: 22px;
-  font-weight: 600;
-  margin-top: 4px;
-}
-.kpi-sub {
-  color: #aaa;
-  font-size: 12px;
-  margin-top: 2px;
-}
-.panels {
-  display: flex;
-  gap: 16px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-.panel {
-  flex: 1;
-  min-width: 380px;
-}
-.panel-note {
-  color: #999;
-  font-size: 12px;
-  margin-top: 12px;
-}
-/* 漏斗 */
-.funnel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-}
-.funnel-step {
-  width: 100%;
-  text-align: center;
-}
+.kpi-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.kpi-card { flex: 1; min-width: 170px; }
+.kpi-label { color: #888; font-size: 12px; }
+.kpi-value { font-size: 22px; font-weight: 600; margin-top: 4px; }
+.kpi-sub { color: #aaa; font-size: 12px; margin-top: 2px; }
+.panels { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+.panel { flex: 1; min-width: 380px; }
+.panel-note { color: #999; font-size: 12px; margin-top: 12px; }
+/* 漏斗（品牌色：蓝主/橙分销/绿成交） */
+.funnel { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.funnel-step { width: 100%; text-align: center; }
 .funnel-bar {
-  margin: 0 auto;
-  min-height: 44px;
-  background: linear-gradient(90deg, #2e6be6, #5b8ff0);
-  border-radius: 6px;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  transition: width 0.4s;
+  margin: 0 auto; min-height: 44px; border-radius: 6px; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; transition: width 0.4s;
 }
-.funnel-step:nth-child(2) .funnel-bar { background: linear-gradient(90deg, #ff8f1f, #ffab55); }
-.funnel-step:nth-child(3) .funnel-bar { background: linear-gradient(90deg, #00a870, #4cc79a); }
-.funnel-rate {
-  color: #999;
-  font-size: 12px;
-  margin-top: 4px;
-}
+.lvcreated { background: linear-gradient(90deg, #2e6be6, #5b8ff0); max-width: 100%; }
+.lvpaid { background: linear-gradient(90deg, #ff8f1f, #ffab55); }
+.lvdistribution { background: linear-gradient(90deg, #00a870, #4cc79a); }
+.funnel-rate { color: #999; font-size: 12px; margin-top: 4px; }
 /* 趋势条形图 */
-.trend {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  height: 200px;
-  padding-top: 8px;
-}
-.trend-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-}
-.trend-amount {
-  font-size: 10px;
-  color: #888;
-  margin-bottom: 2px;
-}
-.trend-bar-wrap {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.trend-bar {
-  width: 60%;
-  background: #2e6be6;
-  border-radius: 3px 3px 0 0;
-  transition: height 0.4s;
-}
-.trend-day {
-  font-size: 10px;
-  color: #999;
-  margin-top: 4px;
-}
-.trend-count {
-  font-size: 10px;
-  color: #bbb;
-}
+.trend { display: flex; align-items: flex-end; gap: 6px; height: 200px; padding-top: 8px; }
+.trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+.trend-amount { font-size: 10px; color: #888; margin-bottom: 2px; }
+.trend-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.trend-bar { width: 60%; background: #2e6be6; border-radius: 3px 3px 0 0; transition: height 0.4s; }
+.trend-day { font-size: 10px; color: #999; margin-top: 4px; }
 </style>

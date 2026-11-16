@@ -1,21 +1,31 @@
-// 我的：登录态展示 + 入口占位（分销中心 M2 接入）
+// 我的：登录态 + 资料（user/me）+ 分销入口
 const { ensureLogin, getToken, getUserId } = require('../../services/request');
+const userService = require('../../services/user.service');
 
 Page({
   data: {
     loggedIn: false,
     userId: '',
-    errMsg: ''
+    errMsg: '',
+    me: null
   },
 
   onShow() {
-    if (getToken()) {
-      this.setData({ loggedIn: true, userId: getUserId() });
+    if (!getToken()) {
+      ensureLogin()
+        .then(() => this.loadProfile())
+        .catch((e) => this.setData({ loggedIn: false, errMsg: e.msg || '登录失败' }));
       return;
     }
-    ensureLogin()
-      .then(() => this.setData({ loggedIn: true, userId: getUserId(), errMsg: '' }))
-      .catch((e) => this.setData({ loggedIn: false, errMsg: e.msg || '登录失败' }));
+    this.setData({ loggedIn: true, userId: getUserId() });
+    this.loadProfile();
+  },
+
+  loadProfile() {
+    userService
+      .getMe()
+      .then((me) => this.setData({ me, loggedIn: true, userId: String(me.userId) }))
+      .catch(() => {});
   },
 
   relogin() {

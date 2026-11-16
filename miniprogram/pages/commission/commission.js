@@ -92,6 +92,10 @@ Page({
     wx.navigateTo({ url: '/pages/team/team' });
   },
 
+  goWithdraw() {
+    wx.navigateTo({ url: '/pages/withdraw/withdraw' });
+  },
+
   retry() {
     this.fetchAll();
   }

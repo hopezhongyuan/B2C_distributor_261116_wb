@@ -9,7 +9,8 @@
     "pages/profile/profile",
     "pages/commission/commission",
     "pages/team/team",
-    "pages/rule/rule"
+    "pages/rule/rule",
+    "pages/withdraw/withdraw"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",

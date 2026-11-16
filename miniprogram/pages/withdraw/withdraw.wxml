@@ -1,0 +1,55 @@
+<view wx:if="{{loading}}" class="state">加载中…</view>
+<view wx:elif="{{error}}" class="state">
+  <view class="state-err">{{error}}</view>
+  <view class="btn-retry" bindtap="retry">重试</view>
+</view>
+<block wx:else>
+  <view class="card hero">
+    <view class="hero-label">可提现余额（元）</view>
+    <view class="hero-amount">{{summary.availableText}}</view>
+    <view class="hero-tip">最低提现 {{summary.minText}} 元 · 审核通过后转账到微信零钱</view>
+  </view>
+
+  <view class="card">
+    <view class="sec-title">提现金额</view>
+    <view class="amount-row">
+      <text class="yen">¥</text>
+      <input class="amount-input" type="digit" placeholder="输入金额" value="{{amount}}" bindinput="onAmountInput" />
+      <view class="btn-all" bindtap="fillAll">全部</view>
+    </view>
+
+    <block wx:if="{{!realnamed}}">
+      <view class="sec-title">实名认证（首次提现需填写）</view>
+      <view wx:if="{{summary.realNameMasked}}" class="text-secondary realname-tip">已实名：{{summary.realNameMasked}}</view>
+      <block wx:else>
+        <view class="form-row">
+          <text class="form-label">真实姓名</text>
+          <input class="form-input" placeholder="与身份证一致" value="{{realName}}" bindinput="onNameInput" />
+        </view>
+        <view class="form-row">
+          <text class="form-label">身份证号</text>
+          <input class="form-input" placeholder="18 位身份证号码" value="{{idCardNo}}" bindinput="onIdInput" />
+        </view>
+        <view class="text-secondary privacy-tip">信息仅用于微信商家转账，AES 加密存储</view>
+      </block>
+    </block>
+    <view wx:else class="text-secondary realname-tip">已实名：{{summary.realNameMasked}}</view>
+
+    <view class="btn-submit {{submitting ? 'disabled' : ''}}" bindtap="submit">
+      {{submitting ? '提交中…' : '申请提现'}}
+    </view>
+    <view wx:if="{{summary.pendingCount > 0}}" class="text-secondary pending-tip">有 {{summary.pendingCount}} 笔在途申请，审核完成后可再次提现</view>
+  </view>
+
+  <view class="card">
+    <view class="sec-title">提现记录</view>
+    <view wx:if="{{!records.length}}" class="text-secondary empty">暂无提现记录</view>
+    <view wx:for="{{records}}" wx:key="withdrawNo" class="rec">
+      <view class="rec-main">
+        <view class="rec-title">{{item.statusLabel}} · {{item.timeText}}</view>
+        <view wx:if="{{item.rejected}}" class="text-secondary rec-sub">驳回原因：{{item.rejectReason}}</view>
+      </view>
+      <view class="rec-amount">¥{{item.amountText}}</view>
+    </view>
+  </view>
+</block>

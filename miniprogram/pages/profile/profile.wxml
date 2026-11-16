@@ -1,8 +1,8 @@
 <view class="card head">
   <view class="avatar">{{loggedIn ? '👤' : '?'}}</view>
   <view class="head-info">
-    <view class="head-title">{{loggedIn ? '已登录' : '未登录'}}</view>
-    <view class="text-secondary" wx:if="{{loggedIn}}">分享商品给好友，成交即得佣金</view>
+    <view class="head-title">{{loggedIn ? (me && me.nickname ? me.nickname : '微信用户') : '未登录'}}</view>
+    <view class="text-secondary" wx:if="{{loggedIn}}">{{me && me.isRealnamed ? '已实名 ' + me.realNameMasked : '分享商品给好友，成交即得佣金'}}</view>
     <view class="text-secondary" wx:else>{{errMsg}}</view>
   </view>
   <view wx:if="{{!loggedIn}}" class="btn-mini" bindtap="relogin">重新登录</view>

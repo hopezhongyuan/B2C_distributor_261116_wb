@@ -7,7 +7,8 @@
   <view class="card hero">
     <view class="hero-label">累计佣金（元）</view>
     <view class="hero-amount">{{summary.totalText}}</view>
-    <view class="hero-tip text-secondary">可提现 {{summary.availableText}} 元 · 提现功能 M3 上线</view>
+    <view class="hero-tip">可提现 {{summary.availableText}} 元</view>
+    <view class="hero-btn" bindtap="goWithdraw">立即提现</view>
   </view>
 
   <view class="grid">

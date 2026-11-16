@@ -90,8 +90,7 @@ function decryptAesGcm(nonce, ciphertextB64, associatedData) {
 }
 
 /** 拉取并缓存平台证书（/v3/certificates，响应本身经授权头签名保护） */
-async function ensurePlatformCerts() {
-  if (certCache.size > 0) return;
+async function fetchPlatformCerts() {
   const res = await apiRequest('GET', '/v3/certificates');
   for (const item of res.data || []) {
     const pem = decryptAesGcm(item.encrypt_certificate.nonce, item.encrypt_certificate.ciphertext, 'certificate');
@@ -100,10 +99,20 @@ async function ensurePlatformCerts() {
   if (certCache.size === 0) throw { code: ERRORS.WX_API_ERROR, msg: '平台证书为空' };
 }
 
+async function ensurePlatformCerts(force) {
+  if (!force && certCache.size > 0) return;
+  await fetchPlatformCerts();
+}
+
 /** 回调验签（Wechatpay-Signature 覆盖 ts\nnonce\nbody\n），失败抛错 */
 async function verifyNotifySignature(headers, rawBodyStr) {
-  await ensurePlatformCerts();
-  const publicKey = certCache.get(headers['wechatpay-serial']);
+  const serial = headers['wechatpay-serial'];
+  let publicKey = certCache.get(serial);
+  if (!publicKey) {
+    // 序列号未命中缓存 → 微信可能轮换了平台证书，强制重新拉取后再验（官方推荐做法）
+    await ensurePlatformCerts(true);
+    publicKey = certCache.get(serial);
+  }
   if (!publicKey) throw { code: ERRORS.WX_API_ERROR, msg: '未知平台证书序列号' };
   const message = `${headers['wechatpay-timestamp']}\n${headers['wechatpay-nonce']}\n${rawBodyStr}\n`;
   const okVerify = crypto

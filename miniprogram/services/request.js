@@ -1,8 +1,9 @@
-// 请求封装：统一 baseURL、token 注入、错误码处理
+// 请求封装：统一 baseURL、token 注入、错误码处理、静默登录
 const config = require('../config/index');
 const ERRORS = require('../config/errors');
 
 const TOKEN_KEY = 'token';
+const UID_KEY = 'userId';
 
 function getToken() {
   return wx.getStorageSync(TOKEN_KEY) || '';
@@ -10,6 +11,14 @@ function getToken() {
 
 function setToken(token) {
   wx.setStorageSync(TOKEN_KEY, token || '');
+}
+
+function getUserId() {
+  return wx.getStorageSync(UID_KEY) || '';
+}
+
+function setUserId(uid) {
+  wx.setStorageSync(UID_KEY, uid || '');
 }
 
 function rawRequest(options) {
@@ -23,7 +32,7 @@ function rawRequest(options) {
         Authorization: 'Bearer ' + getToken()
       },
       success: resolve,
-      fail: reject
+      fail: () => reject({ code: ERRORS.SYSTEM_ERROR, msg: '网络异常，请稍后再试' })
     });
   });
 }
@@ -42,28 +51,63 @@ function request(options) {
     }
     if (body.code === ERRORS.UNAUTHORIZED) {
       setToken('');
-      // 未登录/过期：静默清 token，由页面自行引导登录
+      setUserId('');
     }
     throw { code: body.code, msg: body.msg || '请求失败' };
   });
 }
 
-// 登录入口（M1 接入 auth 模块后实现，当前仅占位保证结构完整）
-function login() {
+// wx.login 取 code
+function getWxCode() {
   return new Promise((resolve, reject) => {
     wx.login({
       success: (res) => resolve(res.code),
-      fail: reject
+      fail: () => reject({ code: ERRORS.SYSTEM_ERROR, msg: '微信登录失败' })
     });
-  }).then((code) => request({ url: '/auth/login', method: 'POST', data: { code } }))
-    .then((data) => {
-      setToken(data.token);
-      return data;
-    });
+  });
 }
 
-function initLaunch() {
-  // M1：静默登录 + 关系绑定参数上报（带参 scene 解析）
+// 解析进入场景中的邀请参数：如 pages/product-detail?inviterId=123（分享链接携带）
+function parseInviterFromLaunch(launchOptions) {
+  const query = (launchOptions && launchOptions.query) || {};
+  const inviterId = parseInt(query.inviterId, 10);
+  return Number.isInteger(inviterId) && inviterId > 0 ? inviterId : undefined;
 }
 
-module.exports = { request, login, getToken, setToken, initLaunch };
+let loginPromise = null;
+
+/**
+ * 静默登录（带单飞：并发调用共享同一请求）；inviterId 仅在无上级时被服务端采纳
+ */
+function ensureLogin(inviterId) {
+  if (getToken()) return Promise.resolve(true);
+  if (!loginPromise) {
+    loginPromise = getWxCode()
+      .then((code) => request({
+        url: '/auth/login',
+        method: 'POST',
+        data: { code, inviterId, scene: 'miniprogram' }
+      }))
+      .then((data) => {
+        setToken(data.token);
+        setUserId(data.userId);
+        loginPromise = null;
+        return true;
+      })
+      .catch((e) => {
+        loginPromise = null;
+        throw e;
+      });
+  }
+  return loginPromise;
+}
+
+// app 启动：带参进入时先解析邀请人，登录时一并上报（先到先得绑定，服务端裁决）
+function initLaunch(launchOptions) {
+  const inviterId = parseInviterFromLaunch(launchOptions);
+  ensureLogin(inviterId).catch(() => {
+    // 静默失败：浏览类页面不依赖登录，下单时再引导
+  });
+}
+
+module.exports = { request, ensureLogin, getToken, getUserId, setToken, initLaunch, parseInviterFromLaunch };

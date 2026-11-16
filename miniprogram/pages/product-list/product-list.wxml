@@ -1,0 +1,33 @@
+<view class="filter">
+  <view
+    wx:for="{{types}}"
+    wx:key="key"
+    class="filter-item {{activeType === item.key ? 'active' : ''}}"
+    bindtap="switchType"
+    data-key="{{item.key}}"
+  >{{item.label}}</view>
+</view>
+
+<view wx:if="{{loading && list.length === 0}}" class="empty-box">加载中…</view>
+<view wx:elif="{{error && list.length === 0}}" class="empty-box">{{error}}</view>
+<view wx:elif="{{list.length === 0}}" class="empty-box">该分类暂无商品</view>
+
+<view wx:else>
+  <view class="card row" wx:for="{{list}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+    <image class="row-cover" src="{{item.coverImage}}" mode="aspectFill" />
+    <view class="row-info">
+      <view class="row-title">{{item.title}}</view>
+      <view class="row-bottom">
+        <view class="price-wrap">
+          <text class="price-unit">¥</text>
+          <text class="price-text price-sm">{{item.price.yuan}}</text>
+          <text class="price-unit">.{{item.price.dec}}</text>
+        </view>
+        <text class="tag {{item.type === 'virtual' ? 'tag-orange' : 'tag-blue'}}">
+          {{item.type === 'virtual' ? '课程服务' : '实物'}}
+        </text>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{noMore}}" class="empty-box">— 没有更多了 —</view>
+</view>

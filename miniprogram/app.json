@@ -1,13 +1,29 @@
 {
   "pages": [
-    "pages/home/home"
+    "pages/home/home",
+    "pages/product-list/product-list",
+    "pages/product-detail/product-detail",
+    "pages/checkout/checkout",
+    "pages/order-list/order-list",
+    "pages/profile/profile"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "精选商城",
-    "backgroundColor": "#f5f6f7",
+    "navigationBarTitleText": "精选课堂",
+    "backgroundColor": "#F5F6F7",
     "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#86909C",
+    "selectedColor": "#2E6BE6",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "首页" },
+      { "pagePath": "pages/order-list/order-list", "text": "订单" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",

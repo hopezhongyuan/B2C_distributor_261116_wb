@@ -1,0 +1,41 @@
+<view class="filter">
+  <view
+    wx:for="{{tabs}}"
+    wx:key="key"
+    class="filter-item {{activeTab === item.key ? 'active' : ''}}"
+    bindtap="switchTab"
+    data-key="{{item.key}}"
+  >{{item.label}}</view>
+</view>
+
+<view wx:if="{{loading && list.length === 0}}" class="empty-box">加载中…</view>
+<view wx:elif="{{error && list.length === 0}}" class="empty-box">{{error}}</view>
+<view wx:elif="{{list.length === 0}}" class="empty-box">暂无相关订单</view>
+
+<view wx:else>
+  <view class="card" wx:for="{{list}}" wx:key="id">
+    <view class="order-head">
+      <text class="text-secondary">单号 {{item.orderNo}}</text>
+      <text class="status">{{item.statusText}}</text>
+    </view>
+    <view class="order-body" bindtap="goDetail" data-pid="{{item.id}}">
+      <image wx:if="{{item.coverImage}}" class="order-cover" src="{{item.coverImage}}" mode="aspectFill" />
+      <view class="order-title">{{item.title || '订单商品'}}</view>
+    </view>
+    <view class="order-foot">
+      <view class="price-wrap">
+        <text class="text-secondary">实付 </text>
+        <text class="price-unit">¥</text>
+        <text class="price-text price-sm">{{item.payable.yuan}}</text>
+        <text class="price-unit">.{{item.payable.dec}}</text>
+      </view>
+      <view
+        wx:if="{{item.status === 'PENDING_PAY'}}"
+        class="btn-mini {{paying ? 'disabled' : ''}}"
+        bindtap="goPay"
+        data-id="{{item.id}}"
+      >去支付</view>
+    </view>
+  </view>
+  <view wx:if="{{noMore}}" class="empty-box">— 没有更多了 —</view>
+</view>

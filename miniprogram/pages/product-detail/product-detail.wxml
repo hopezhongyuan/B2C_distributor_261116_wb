@@ -1,0 +1,38 @@
+<view wx:if="{{loading}}" class="empty-box">加载中…</view>
+<view wx:elif="{{error}}" class="empty-box">{{error}}</view>
+
+<block wx:elif="{{product}}">
+  <image class="hero" src="{{product.images[0] || product.coverImage}}" mode="aspectFill" />
+
+  <view class="card">
+    <view class="price-line">
+      <text class="price-unit">¥</text>
+      <text class="price-text">{{product.price.yuan}}</text>
+      <text class="price-unit">.{{product.price.dec}}</text>
+      <text class="tag {{product.type === 'virtual' ? 'tag-orange' : 'tag-blue'}}">
+        {{product.type === 'virtual' ? '课程服务' : '实物'}}
+      </text>
+    </view>
+    <view class="title">{{product.title}}</view>
+    <view class="sub text-secondary">
+      {{product.type === 'virtual' ? '虚拟服务，核销后不可退' : '库存 ' + product.stock + ' 件 · 7 天无理由退货'}}
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="sec-title">商品介绍</view>
+    <view class="detail">{{product.detail || '暂无详细介绍'}}</view>
+  </view>
+
+  <view class="foot-bar">
+    <button class="share-btn" open-type="share">分享</button>
+    <view class="qty">
+      <view class="qty-btn" bindtap="onQuantityChange" data-type="dec">−</view>
+      <view class="qty-num">{{quantity}}</view>
+      <view class="qty-btn" bindtap="onQuantityChange" data-type="inc">＋</view>
+    </view>
+    <view class="btn-primary foot-buy" bindtap="buy">
+      {{product.type === 'virtual' ? '立即报名' : '立即购买'}}
+    </view>
+  </view>
+</block>

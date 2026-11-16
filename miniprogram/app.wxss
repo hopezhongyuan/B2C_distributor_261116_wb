@@ -1,5 +1,85 @@
+/* 全局设计规范（唯一事实源：docs/ui/design-tokens.md），页面只允许使用以下变量与工具类 */
 page {
-  background: #f5f6f7;
-  font-size: 28rpx;
-  color: #222;
+  /* 色彩 */
+  --color-primary: #2E6BE6;
+  --color-primary-light: #EAF2FF;
+  --color-accent: #FF8F1F;
+  --color-accent-light: #FFF3E6;
+  --color-bg: #F5F6F7;
+  --color-card: #FFFFFF;
+  --color-text: #1F2329;
+  --color-text-secondary: #86909C;
+  --color-disabled: #C9CDD4;
+  --color-success: #00B42A;
+  --color-danger: #F53F3F;
+  --color-border: #E5E6EB;
+
+  /* 字号 */
+  --font-title: 36rpx;
+  --font-subtitle: 32rpx;
+  --font-body: 28rpx;
+  --font-caption: 24rpx;
+  --font-price: 40rpx;
+
+  /* 间距/圆角 */
+  --space-xs: 8rpx;
+  --space-sm: 16rpx;
+  --space-md: 24rpx;
+  --space-lg: 32rpx;
+  --space-xl: 48rpx;
+  --radius-sm: 8rpx;
+  --radius-md: 16rpx;
+  --radius-lg: 24rpx;
+
+  background: var(--color-bg);
+  font-size: var(--font-body);
+  color: var(--color-text);
+}
+
+/* —— 工具类 —— */
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin: var(--space-sm) var(--space-md);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: var(--font-subtitle);
+  font-weight: 500;
+}
+
+.btn-primary.disabled {
+  background: var(--color-disabled);
+}
+
+.price-text {
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: var(--font-price);
+}
+
+.price-unit {
+  color: var(--color-accent);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+  font-size: var(--font-caption);
+}
+
+.empty-box {
+  padding: 160rpx 0;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-body);
 }

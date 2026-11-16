@@ -1,5 +1,27 @@
-<view class="container">
-  <view class="title">精选商城</view>
-  <view class="desc">{{motto}}</view>
-  <view class="meta">API: {{apiBase}}</view>
+<view class="page-head">
+  <view class="page-title">精选课堂</view>
+  <view class="page-slogan">好课好物，学习成长</view>
+</view>
+
+<view wx:if="{{loading}}" class="empty-box">加载中…</view>
+<view wx:elif="{{error}}" class="empty-box">{{error}}
+  <view class="btn-retry" bindtap="fetchList">重试</view>
+</view>
+<view wx:elif="{{products.length === 0}}" class="empty-box">暂无商品，敬请期待</view>
+
+<view wx:else class="grid">
+  <view class="grid-item" wx:for="{{products}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+    <image class="cover" src="{{item.coverImage}}" mode="aspectFill" />
+    <view class="item-title">{{item.title}}</view>
+    <view class="item-foot">
+      <view class="price-wrap">
+        <text class="price-unit">¥</text>
+        <text class="price-text">{{item.price.yuan}}</text>
+        <text class="price-unit">.{{item.price.dec}}</text>
+      </view>
+      <text class="tag {{item.type === 'virtual' ? 'tag-orange' : 'tag-blue'}}">
+        {{item.type === 'virtual' ? '课程服务' : '实物'}}
+      </text>
+    </view>
+  </view>
 </view>

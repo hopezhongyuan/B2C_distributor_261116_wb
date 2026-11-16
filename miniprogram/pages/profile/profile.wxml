@@ -1,0 +1,24 @@
+<view class="card head">
+  <view class="avatar">{{loggedIn ? '👤' : '?'}}</view>
+  <view class="head-info">
+    <view class="head-title">{{loggedIn ? '已登录' : '未登录'}}</view>
+    <view class="text-secondary" wx:if="{{loggedIn}}">分销功能将在 M2 上线，敬请期待</view>
+    <view class="text-secondary" wx:else>{{errMsg}}</view>
+  </view>
+  <view wx:if="{{!loggedIn}}" class="btn-mini" bindtap="relogin">重新登录</view>
+</view>
+
+<view class="card menu-item" bindtap="copyUserId">
+  <text>我的邀请 ID（分享用）</text>
+  <text class="text-secondary">{{loggedIn ? userId : '登录后可见'}} ></text>
+</view>
+
+<view class="card menu-item">
+  <text>分销中心</text>
+  <text class="text-secondary">M2 上线 ></text>
+</view>
+
+<view class="card menu-item">
+  <text>分销规则</text>
+  <text class="text-secondary">M2 上线 ></text>
+</view>

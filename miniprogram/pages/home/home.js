@@ -1,16 +1,43 @@
-// 首页：品牌位 + 商品入口（M1 接入商品数据）
+// 首页：精选商品（首批）+ 入口
+const productService = require('../../services/product.service');
+const { fenToParts, fenToYuan } = require('../../utils/format');
+
 Page({
   data: {
-    motto: 'M0.2 工程骨架已就绪',
-    apiBase: ''
+    loading: true,
+    error: '',
+    products: []
   },
 
   onLoad() {
-    const config = require('../../config/index');
-    this.setData({ apiBase: config.API_BASE_URL });
+    this.fetchList();
   },
 
   onPullDownRefresh() {
-    wx.stopPullDownRefresh();
+    this.fetchList(() => wx.stopPullDownRefresh());
+  },
+
+  fetchList(done) {
+    this.setData({ loading: true, error: '' });
+    productService
+      .listProducts({ page: 1, pageSize: 6 })
+      .then((data) => {
+        const products = (data.list || []).map((p) => ({
+          id: p.id,
+          title: p.title,
+          type: p.type,
+          coverImage: p.coverImage,
+          stock: p.stock,
+          price: fenToParts(p.priceCents),
+          priceText: fenToYuan(p.priceCents)
+        }));
+        this.setData({ products, loading: false });
+      })
+      .catch((e) => this.setData({ loading: false, error: e.msg || '加载失败' }))
+      .then(() => done && done());
+  },
+
+  goDetail(e) {
+    wx.navigateTo({ url: '/pages/product-detail/product-detail?id=' + e.currentTarget.dataset.id });
   }
 });

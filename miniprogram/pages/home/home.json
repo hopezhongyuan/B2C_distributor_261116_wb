@@ -1,4 +1,5 @@
 {
-  "navigationBarTitleText": "精选商城",
-  "enablePullDownRefresh": false
+  "navigationBarTitleText": "精选课堂",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
 }

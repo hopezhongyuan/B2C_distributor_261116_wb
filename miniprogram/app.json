@@ -1,16 +1,19 @@
 {
   "pages": [
     "pages/home/home",
-    "pages/cart/cart",
     "pages/product-list/product-list",
+    "pages/commission/commission",
+    "pages/profile/profile",
+    "pages/cart/cart",
     "pages/product-detail/product-detail",
     "pages/checkout/checkout",
     "pages/order-list/order-list",
-    "pages/profile/profile",
-    "pages/commission/commission",
+    "pages/order-detail/order-detail",
+    "pages/pay-result/pay-result",
     "pages/team/team",
     "pages/rule/rule",
-    "pages/withdraw/withdraw"
+    "pages/withdraw/withdraw",
+    "pages/poster/poster"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",
@@ -26,7 +29,8 @@
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/home/home", "text": "首页" },
-      { "pagePath": "pages/order-list/order-list", "text": "订单" },
+      { "pagePath": "pages/product-list/product-list", "text": "分类" },
+      { "pagePath": "pages/commission/commission", "text": "分销中心" },
       { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },

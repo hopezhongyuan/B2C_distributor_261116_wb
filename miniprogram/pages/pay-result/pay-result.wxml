@@ -1,0 +1,10 @@
+<view class="result-box">
+  <view class="result-icon">{{view.icon}}</view>
+  <view class="result-title">{{view.title}}</view>
+  <view class="result-desc">{{view.desc}}</view>
+  <view wx:if="{{payableText}}" class="result-amount">{{payableText}}</view>
+
+  <view wx:if="{{canRepay}}" class="btn-primary {{paying ? 'disabled' : ''}}" bindtap="repay">继续支付</view>
+  <view class="btn-plain" bindtap="goOrder">查看订单</view>
+  <view class="btn-plain subtle" bindtap="goHome">返回首页</view>
+</view>

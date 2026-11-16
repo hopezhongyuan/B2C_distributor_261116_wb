@@ -97,7 +97,7 @@ Page({
   },
 
   goDetail(e) {
-    wx.navigateTo({ url: '/pages/product-detail/product-detail?id=' + e.currentTarget.dataset.pid });
+    wx.navigateTo({ url: '/pages/order-detail/order-detail?id=' + e.currentTarget.dataset.pid });
   },
 
   // —— 申请退款（内联弹窗：金额 + 原因） ——

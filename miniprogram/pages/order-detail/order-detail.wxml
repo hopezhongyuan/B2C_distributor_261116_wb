@@ -1,0 +1,40 @@
+<view wx:if="{{loading}}" class="empty-box">加载中…</view>
+<view wx:elif="{{error}}" class="empty-box">{{error}}</view>
+
+<view wx:elif="{{order}}" class="detail">
+  <view class="card status-card">
+    <view class="status-main">{{order.statusText}}</view>
+    <view class="text-secondary" wx:if="{{order.payTimeText}}">支付时间 {{order.payTimeText}}</view>
+    <view class="text-secondary">下单时间 {{order.createdAtText}}</view>
+  </view>
+
+  <view class="card">
+    <view class="item" wx:for="{{order.items}}" wx:key="id">
+      <view class="item-info">
+        <view class="item-title">{{item.title}}</view>
+        <view class="text-secondary">¥{{item.price.yuan}}.{{item.price.dec}} ×{{item.quantity}}</view>
+      </view>
+      <view class="item-amount">¥{{item.amount.yuan}}.{{item.amount.dec}}</view>
+    </view>
+    <view class="total-row">
+      <text>实付款</text>
+      <text class="total-price">¥{{order.payable.yuan}}.{{order.payable.dec}}</text>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{order.receiverInfo}}">
+    <view class="section-label">收货信息</view>
+    <view class="text-secondary">
+      {{order.receiverInfo.name}} {{order.receiverInfo.phone}}
+    </view>
+    <view class="text-secondary">
+      {{order.receiverInfo.province}}{{order.receiverInfo.city}}{{order.receiverInfo.district}}{{order.receiverInfo.address}}
+    </view>
+  </view>
+
+  <view class="op-row">
+    <view wx:if="{{order.canPay}}" class="btn-op primary {{paying ? 'disabled' : ''}}" bindtap="goPay">去支付</view>
+    <view wx:if="{{order.canConfirm}}" class="btn-op primary" bindtap="confirm">确认收货</view>
+    <view wx:if="{{order.canPay || order.canConfirm}}" class="btn-op" bindtap="goRefund">申请退款</view>
+  </view>
+</view>

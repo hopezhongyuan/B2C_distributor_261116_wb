@@ -3,22 +3,32 @@
   <view class="head-info">
     <view class="head-title">{{loggedIn ? (me && me.nickname ? me.nickname : '微信用户') : '未登录'}}</view>
     <view class="text-secondary" wx:if="{{loggedIn}}">{{me && me.isRealnamed ? '已实名 ' + me.realNameMasked : '分享商品给好友，成交即得佣金'}}</view>
-    <view class="text-secondary" wx:else>{{errMsg}}</view>
+    <view class="text-secondary" wx:elif="{{errMsg}}">{{errMsg}}</view>
   </view>
   <view wx:if="{{!loggedIn}}" class="btn-mini" bindtap="relogin">重新登录</view>
 </view>
 
-<view class="card menu-item" bindtap="copyUserId">
-  <text>我的邀请 ID（分享用）</text>
-  <text class="text-secondary">{{loggedIn ? userId : '登录后可见'}} ></text>
+<view class="card menu-item" bindtap="goOrders">
+  <text>我的订单</text>
+  <text class="text-secondary">全部订单 · 退款 ></text>
 </view>
 
 <view class="card menu-item" bindtap="goDistribution">
   <text>分销中心</text>
-  <text class="text-secondary">佣金 · 团队 ></text>
+  <text class="text-secondary">佣金 · 团队 · 海报 ></text>
+</view>
+
+<view class="card menu-item" wx:if="{{me && me.inviterId}}">
+  <text>我的推荐人</text>
+  <text class="text-secondary">邀请 ID {{me.inviterId}}</text>
 </view>
 
 <view class="card menu-item" bindtap="goRule">
   <text>分销规则</text>
   <text class="text-secondary">层级 · 结算 · 提现 ></text>
+</view>
+
+<view class="card menu-item">
+  <text>联系客服</text>
+  <button class="contact-btn" open-type="contact">微信客服 ></button>
 </view>

@@ -13,4 +13,9 @@ function updateProfile({ nickname, avatar } = {}) {
   }));
 }
 
-module.exports = { getMe, updateProfile };
+/** 带参小程序码（推广海报用）：返回 { base64: dataURL } */
+function getWxacode() {
+  return ensureLogin().then(() => request({ url: '/user/wxacode' }));
+}
+
+module.exports = { getMe, updateProfile, getWxacode };

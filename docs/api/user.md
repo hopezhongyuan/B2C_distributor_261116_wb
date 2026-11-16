@@ -39,3 +39,8 @@
 **错误码**：1001 / 1002 / 9001。
 
 **说明**：微信头像昵称按平台规范由前端 `open-type="chooseAvatar"` / `type="nickname"` 输入组件采集后经本接口上报；不在服务端调微信资料接口（避免额外敏感权限）。**实名信息不在此接口**——仅随提现申请提交（见 withdraw.md），单一入口防绕过。
+
+## GET /api/user/wxacode
+
+**功能描述**：生成带参小程序码（推广海报用）。scene=`i=<userId>`，落 `pages/home/home`，由绑定链路解析。返回 `{ base64: "data:image/png;base64,..." }`。
+**说明**：小程序未发布前 env_version 默认 `trial`（WXACODE_ENV_VERSION 可切 develop/release）；需已配置 WX_APPID/WX_SECRET。

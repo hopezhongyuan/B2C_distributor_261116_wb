@@ -8,5 +8,6 @@ const router = express.Router();
 
 router.get('/me', requireUser, wrap(controller.me));
 router.post('/profile', requireUser, wrap(controller.updateProfile));
+router.get('/wxacode', requireUser, wrap(controller.wxacode));
 
 module.exports = router;

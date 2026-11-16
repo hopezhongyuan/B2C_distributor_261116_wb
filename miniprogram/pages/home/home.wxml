@@ -3,6 +3,27 @@
   <view class="page-slogan">好课好物，学习成长</view>
 </view>
 
+<view class="cate-nav">
+  <view class="cate-item cate-blue" bindtap="goCategory" data-type="physical">
+    <view class="cate-icon">📦</view>
+    <view class="cate-name">好物商城</view>
+  </view>
+  <view class="cate-item cate-orange" bindtap="goCategory" data-type="virtual">
+    <view class="cate-icon">🎓</view>
+    <view class="cate-name">课程服务</view>
+  </view>
+  <view class="cate-item cate-green" bindtap="goCart">
+    <view class="cate-icon">🛒</view>
+    <view class="cate-name">购物车</view>
+  </view>
+  <view class="cate-item cate-purple" bindtap="goOrders">
+    <view class="cate-icon">📋</view>
+    <view class="cate-name">我的订单</view>
+  </view>
+</view>
+
+<view wx:if="{{!loading && !error && products.length}}" class="section-title">推荐好物</view>
+
 <view wx:if="{{loading}}" class="empty-box">加载中…</view>
 <view wx:elif="{{error}}" class="empty-box">{{error}}
   <view class="btn-retry" bindtap="retry">重试</view>

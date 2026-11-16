@@ -66,5 +66,20 @@ Page({
         wx.showToast({ title: err && err.errMsg ? err.errMsg : '跳转失败', icon: 'none' });
       }
     });
+  },
+
+  // 分类导航：切到分类 tab 并带类型（tab 页不可带参跳转，经 storage 传递）
+  goCategory(e) {
+    const type = e.currentTarget.dataset.type || '';
+    wx.setStorageSync('product_list_type', type);
+    wx.switchTab({ url: '/pages/product-list/product-list' });
+  },
+
+  goCart() {
+    wx.navigateTo({ url: '/pages/cart/cart' });
+  },
+
+  goOrders() {
+    wx.navigateTo({ url: '/pages/order-list/order-list' });
   }
 });

@@ -43,3 +43,18 @@
   font-size: var(--font-caption);
   padding: 0 var(--space-md);
 }
+
+.contact-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-body);
+  color: var(--color-text-secondary);
+  line-height: inherit;
+  font-weight: normal;
+}
+
+.contact-btn::after {
+  border: none;
+}

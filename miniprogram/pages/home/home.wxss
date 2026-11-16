@@ -83,3 +83,33 @@
   color: #fff;
   font-size: var(--font-caption);
 }
+
+.cate-nav {
+  display: flex;
+  margin: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.cate-item {
+  flex: 1;
+  background: var(--color-card);
+  border-radius: 16rpx;
+  padding: 20rpx 0;
+  text-align: center;
+}
+
+.cate-icon {
+  font-size: 40rpx;
+}
+
+.cate-name {
+  font-size: var(--font-caption);
+  color: var(--color-text);
+  margin-top: 8rpx;
+}
+
+.section-title {
+  font-size: var(--font-title);
+  font-weight: 600;
+  margin: var(--space-md) var(--space-md) 0;
+}

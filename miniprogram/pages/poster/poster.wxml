@@ -1,0 +1,10 @@
+<view class="poster-wrap">
+  <view wx:if="{{error}}" class="empty-box">{{error}}<view class="btn-retry" bindtap="drawPoster">重试</view></view>
+
+  <canvas wx:if="{{ready && !error}}" type="2d" id="poster" class="poster-canvas"></canvas>
+
+  <view wx:if="{{ready && !error}}" class="poster-tips">
+    <view class="tip-main">长按画布或点击下方按钮保存</view>
+    <view class="btn-save {{saving ? 'disabled' : ''}}" bindtap="save">保存海报到相册</view>
+  </view>
+</view>

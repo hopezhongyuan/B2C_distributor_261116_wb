@@ -1,0 +1,49 @@
+.poster-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-lg);
+}
+
+.poster-canvas {
+  width: 600rpx;
+  height: 960rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+}
+
+.poster-tips {
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+
+.tip-main {
+  color: var(--color-text-secondary);
+  font-size: var(--font-caption);
+  margin-bottom: var(--space-md);
+}
+
+.btn-save {
+  width: 460rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: var(--font-body);
+}
+
+.btn-save.disabled {
+  opacity: 0.6;
+}
+
+.btn-retry {
+  display: inline-block;
+  margin-top: var(--space-md);
+  padding: 12rpx 40rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--font-body);
+}

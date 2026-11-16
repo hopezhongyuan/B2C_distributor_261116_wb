@@ -25,7 +25,11 @@ Page({
     noMore: false
   },
 
-  onLoad() {
+  onLoad(options) {
+    // 支持首页分类导航带参进入：?type=physical|virtual（tab 场景经 storage 传递）
+    const type = (options && options.type) || wx.getStorageSync('product_list_type') || '';
+    wx.removeStorageSync('product_list_type');
+    if (type && TYPES.some((t) => t.key === type)) this.data.activeType = type;
     this.fetch(true);
   },
 

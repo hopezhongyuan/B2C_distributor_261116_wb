@@ -16,6 +16,8 @@
     <view class="grid-cell"><view class="num">{{summary.withdrawingText}}</view><view class="label text-secondary">提现中</view></view>
     <view class="grid-cell"><view class="num">{{summary.paidText}}</view><view class="label text-secondary">已到账</view></view>
     <view class="grid-cell" bindtap="goTeam"><view class="num">›</view><view class="label text-secondary">我的团队</view></view>
+    <view class="grid-cell" bindtap="goPoster"><view class="num">🖼</view><view class="label text-secondary">推广海报</view></view>
+    <view class="grid-cell" bindtap="goWithdrawRecords"><view class="num">›</view><view class="label text-secondary">提现记录</view></view>
   </view>
 
   <view class="tabs">

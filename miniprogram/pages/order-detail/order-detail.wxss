@@ -1,0 +1,76 @@
+.detail {
+  padding: var(--space-md);
+}
+
+.status-card {
+  margin-bottom: var(--space-md);
+}
+
+.status-main {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.item-title {
+  font-size: var(--font-body);
+  margin-bottom: 6rpx;
+}
+
+.item-amount {
+  font-weight: 600;
+}
+
+.total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 12rpx;
+  padding-top: var(--space-md);
+  color: var(--color-text-secondary);
+}
+
+.total-price {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.section-label {
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.op-row {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.btn-op {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  border: 1rpx solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--font-body);
+}
+
+.btn-op.primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.btn-op.disabled {
+  opacity: 0.6;
+}

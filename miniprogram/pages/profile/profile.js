@@ -34,17 +34,17 @@ Page({
       .catch((e) => wx.showToast({ title: e.msg || '登录失败', icon: 'none' }));
   },
 
-  copyUserId() {
-    if (!this.data.userId) return;
-    wx.setClipboardData({ data: String(this.data.userId) });
+  goOrders() {
+    wx.navigateTo({ url: '/pages/order-list/order-list' });
   },
 
+  // 分销中心已是 tab 页：必须 switchTab
   goDistribution() {
     if (!this.data.loggedIn) {
       wx.showToast({ title: '请先登录', icon: 'none' });
       return;
     }
-    wx.navigateTo({ url: '/pages/commission/commission' });
+    wx.switchTab({ url: '/pages/commission/commission' });
   },
 
   goRule() {

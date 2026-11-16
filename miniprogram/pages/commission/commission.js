@@ -96,6 +96,14 @@ Page({
     wx.navigateTo({ url: '/pages/withdraw/withdraw' });
   },
 
+  goPoster() {
+    wx.navigateTo({ url: '/pages/poster/poster' });
+  },
+
+  goWithdrawRecords() {
+    wx.navigateTo({ url: '/pages/withdraw/withdraw?tab=records' });
+  },
+
   retry() {
     this.fetchAll();
   }

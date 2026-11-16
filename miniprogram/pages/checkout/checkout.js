@@ -6,6 +6,7 @@ const { fenToParts, toImageUrl } = require('../../utils/format');
 const ERRORS = require('../../config/errors');
 
 const RECEIVER_KEYS = ['name', 'phone', 'province', 'city', 'district', 'address'];
+const LAST_RECEIVER_KEY = 'last_receiver';
 
 Page({
   data: {
@@ -19,6 +20,9 @@ Page({
   },
 
   onLoad(options) {
+    // 轻量地址（PRD 简化：不做地址簿，记住上次收货信息自动回填）
+    const last = wx.getStorageSync(LAST_RECEIVER_KEY);
+    if (last && last.name) this.setData({ receiver: { ...this.data.receiver, ...last } });
     if (options.mode === 'cart' && options.ids) {
       this.loadCartItems(String(options.ids));
     } else {
@@ -105,10 +109,14 @@ Page({
     const orderItems = items.map((it) => ({ productId: it.id, quantity: it.quantity }));
     orderService
       .createOrder({ items: orderItems, receiverInfo: isVirtual ? undefined : receiver })
-      .then((order) => orderService.payOrder(order.orderId))
+      .then((order) => {
+        if (!isVirtual) wx.setStorageSync(LAST_RECEIVER_KEY, receiver);
+        this.setData({ submittingOrderId: order.orderId });
+        return orderService.payOrder(order.orderId);
+      })
       .then(() => {
         if (mode === 'cart') cart.removeMany(items.map((it) => it.id));
-        wx.redirectTo({ url: '/pages/order-list/order-list?status=PAID' });
+        wx.redirectTo({ url: '/pages/pay-result/pay-result?orderId=' + this.data.submittingOrderId + '&status=success' });
       })
       .catch((e) => {
         if (e.code === ERRORS.WX_API_ERROR) {
@@ -117,8 +125,11 @@ Page({
             title: '下单成功',
             content: '支付暂不可用，可稍后在订单中继续支付',
             showCancel: false,
-            success: () => wx.redirectTo({ url: '/pages/order-list/order-list' })
+            success: () => wx.redirectTo({ url: '/pages/pay-result/pay-result?orderId=' + this.data.submittingOrderId + '&status=pending' })
           });
+        } else if (e.code === -1) {
+          // 用户取消支付：同样落支付结果页（标记未支付，可继续支付）
+          wx.redirectTo({ url: '/pages/pay-result/pay-result?orderId=' + this.data.submittingOrderId + '&status=cancel' });
         } else {
           wx.showToast({ title: e.msg || '提交失败', icon: 'none' });
         }

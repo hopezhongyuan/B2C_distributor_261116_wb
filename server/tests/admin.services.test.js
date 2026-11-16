@@ -38,3 +38,28 @@ test('订单买家昵称脱敏：≤4 原样，超 4 中间打码', () => {
   assert.strictEqual(orderAdmin.maskNickname('六个字的名字啊'), '六个****啊');
   assert.strictEqual(orderAdmin.maskNickname(''), '微信用户');
 });
+
+test('佣金管理：状态白名单 + 查询条件组合（M4 尾项）', () => {
+  const commissionAdmin = require('../src/services/commission.admin.service');
+  const { Op } = require('sequelize');
+  // 非法/缺省状态 → null（查全部）
+  assert.strictEqual(commissionAdmin.normalizeStatus('FROZEN'), 'FROZEN');
+  assert.strictEqual(commissionAdmin.normalizeStatus('PAID'), 'PAID');
+  assert.strictEqual(commissionAdmin.normalizeStatus('paid'), null); // 大小写敏感，与 DB 枚举一致
+  assert.strictEqual(commissionAdmin.normalizeStatus(''), null);
+  assert.strictEqual(commissionAdmin.normalizeStatus(undefined), null);
+  // where 组合：无条件
+  assert.deepStrictEqual(commissionAdmin.buildWhere({}), {});
+  // 仅状态
+  assert.deepStrictEqual(commissionAdmin.buildWhere({ status: 'AVAILABLE' }), { status: 'AVAILABLE' });
+  // 关键词：订单号精确 或 受益人昵称模糊，关键词两侧空白剔除
+  const kw = commissionAdmin.buildWhere({ keyword: '  R2026 ' });
+  assert.deepStrictEqual(kw[Op.or], [
+    { '$Order.order_no$': 'R2026' },
+    { '$beneficiary.nickname$': { [Op.like]: '%R2026%' } }
+  ]);
+  // 状态 + 关键词同时生效
+  const both = commissionAdmin.buildWhere({ status: 'PAID', keyword: '张三' });
+  assert.strictEqual(both.status, 'PAID');
+  assert.ok(Array.isArray(both[Op.or]));
+});

@@ -197,6 +197,52 @@
 
 权限：读=全部；写=super/super+ops（super/ops）。修改即时生效（佣金计算经 getConfigMap 动态读取）。
 
-## 11. M4 预留（后续迭代）
+## 11. 佣金管理（M4 尾项，只读）
+
+> 铁律：本组接口只读总览，不提供任何改状态入口；佣金状态迁移唯一入口 = commission.service 状态机 + 提现审核链路。
+
+### 11.1 佣金总览
+
+`GET /api/admin/commissions/summary`
+
+无参数。响应 data：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| byStatus | object | `{ FROZEN: { count, amountCents }, AVAILABLE: …, WITHDRAWING, PAID, VOID }`（无数据的状态缺省） |
+| totalCount | number | 全部佣金笔数 |
+| totalAmountCents | number | 全部佣金金额（分） |
+| unsettledCents | number | 未结算口径 = FROZEN + AVAILABLE + WITHDRAWING（分） |
+
+### 11.2 佣金明细列表
+
+`GET /api/admin/commissions`
+
+| 字段 | 类型 | 必填 | 校验规则 |
+|---|---|---|---|
+| status | string | 否 | FROZEN / AVAILABLE / WITHDRAWING / PAID / VOID（大写，缺省全部；非法值按缺省处理不报错） |
+| keyword | string | 否 | 订单号精确匹配 或 受益人昵称模糊匹配（OR） |
+| page / pageSize | number | 否 | 同 §2 |
+
+响应 data：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| total | number | 总条数 |
+| list[].commissionId | number | 佣金记录 ID |
+| list[].orderNo | string | 关联订单号 |
+| list[].beneficiaryId | number | 受益人（分销员）用户 ID |
+| list[].beneficiaryNickname | string | 受益人昵称（后台运营场景不脱敏，与提现列表口径一致） |
+| list[].level | number | 1=一级佣金 2=二级佣金 |
+| list[].rateBp | number | 成交时费率快照（万分比） |
+| list[].amountCents | number | 佣金金额（分） |
+| list[].status | string | 佣金状态（枚举同上） |
+| list[].settleTime | string/null | 结算时间 ISO（未结算为 null） |
+| list[].withdrawalId | number/null | 绑定的提现单 ID |
+| list[].createdAt | string | 产生时间 ISO |
+
+权限：读=全部登录管理员。
+
+## 12. M4 预留（后续迭代）
 
 RBAC 细粒度权限点、操作审计表、Redis 登录限流、数据看板、退款处理（依赖 M3 退款链路）。

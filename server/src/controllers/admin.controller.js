@@ -5,6 +5,7 @@ const productAdmin = require('../services/product.admin.service');
 const orderAdmin = require('../services/order.admin.service');
 const userAdmin = require('../services/user.admin.service');
 const configAdmin = require('../services/config.admin.service');
+const commissionAdmin = require('../services/commission.admin.service');
 const { ok } = require('../middlewares/errorHandler');
 
 function clampInt(v, min, max, dft) {
@@ -71,6 +72,14 @@ async function distributorStatus(req, res) {
   return ok(res, await userAdmin.setStatus(numId(req.params.id), (req.body || {}).status, req.admin));
 }
 
+// —— 佣金管理（只读，M4 尾项） ——
+async function commissionSummary(req, res) {
+  return ok(res, await commissionAdmin.summary());
+}
+async function commissionList(req, res) {
+  return ok(res, await commissionAdmin.list({ status: req.query.status, keyword: req.query.keyword, ...pageArgs(req) }));
+}
+
 // —— 参数配置 ——
 async function configList(req, res) {
   return ok(res, await configAdmin.listAll());
@@ -83,5 +92,6 @@ module.exports = {
   login, withdrawList, withdrawReview, withdrawSync,
   productList, productCreate, productUpdate, productStatus,
   orderList, orderRedeem, distributorList, distributorStatus,
+  commissionSummary, commissionList,
   configList, configUpdate
 };

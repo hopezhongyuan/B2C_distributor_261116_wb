@@ -29,6 +29,10 @@ router.post('/orders/:id/redeem', requireAdmin, requireRole(OPS), asyncHandler(c
 router.get('/distributors', requireAdmin, asyncHandler(ctrl.distributorList));
 router.post('/distributors/:id/status', requireAdmin, requireRole(OPS), asyncHandler(ctrl.distributorStatus));
 
+// 佣金管理（M4 尾项，只读总览）
+router.get('/commissions/summary', requireAdmin, asyncHandler(ctrl.commissionSummary));
+router.get('/commissions', requireAdmin, asyncHandler(ctrl.commissionList));
+
 // 参数配置（M4）
 router.get('/configs', requireAdmin, asyncHandler(ctrl.configList));
 router.put('/configs/:key', requireAdmin, requireRole(OPS), asyncHandler(ctrl.configUpdate));

@@ -13,6 +13,8 @@ apiclient_cert.pem
 dist/
 build/
 miniprogram_npm/
+# admin-web 静态产物（scp 上传至服务器 repo/admin-dist，供 compose 挂载）
+admin-dist/
 
 # 日志与临时文件
 *.log

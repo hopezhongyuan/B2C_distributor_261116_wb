@@ -35,5 +35,9 @@ Page({
       return;
     }
     wx.navigateTo({ url: '/pages/commission/commission' });
+  },
+
+  goRule() {
+    wx.navigateTo({ url: '/pages/rule/rule' });
   }
 });

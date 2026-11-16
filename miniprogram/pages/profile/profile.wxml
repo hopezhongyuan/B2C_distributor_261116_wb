@@ -18,7 +18,7 @@
   <text class="text-secondary">佣金 · 团队 ></text>
 </view>
 
-<view class="card menu-item">
+<view class="card menu-item" bindtap="goRule">
   <text>分销规则</text>
-  <text class="text-secondary">即将上线 ></text>
+  <text class="text-secondary">层级 · 结算 · 提现 ></text>
 </view>

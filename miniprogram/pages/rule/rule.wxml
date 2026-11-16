@@ -1,0 +1,5 @@
+<view wx:for="{{sections}}" wx:key="title" class="card section">
+  <view class="sec-title">{{item.title}}</view>
+  <view wx:for="{{item.items}}" wx:for-item="line" wx:key="*this" class="line">{{line}}</view>
+</view>
+<view class="foot text-secondary">本规则最终解释权归平台所有 · 如有疑问请联系客服</view>

@@ -154,8 +154,8 @@ PAID/DELIVERED/COMPLETED ──申请售后──▶ REFUNDING ──全额退�
 | api/order.md | 下单、预支付参数、回调、确认收货、售后 | M1 已定稿 |
 | api/relation.md | 绑定状态查询、我的团队（L1/L2） | M2 已定稿 |
 | api/commission.md | 佣金明细/汇总查询；内部：generate/settle/void | M2 已定稿 |
-| api/user.md | 资料、实名信息（提现前置） | M3 |
-| api/withdraw.md | 申请、记录、余额 | M3 |
+| api/user.md | 资料（GET me / POST profile） | M3 已定稿 |
+| api/withdraw.md | 概览、申请（含首次实名）、记录 | M3 已定稿 |
 | api/admin.md | 登录、各管理模块 CRUD、审核操作 | M4 |
 
 契约格式统一遵循 AGENTS.md §5（`{code,data,msg}`、错误码表、幂等性说明）。
@@ -169,4 +169,5 @@ PAID/DELIVERED/COMPLETED ──申请售后──▶ REFUNDING ──全额退�
 | 并发扣库存 | `UPDATE products SET stock=stock-? WHERE id=? AND stock>=?`，影响行数为 0 即售罄回滚 |
 | 定时任务 | 关单扫描（每 5 分钟）、佣金结算扫描（每小时）、对账（每日 00:30） |
 | 敏感数据 | id_card_no AES 加密存储；.env 存 AppSecret/支付证书/DB 密码，不入库不入码 |
+| **实名加密方案（M3.1 定稿 v1.0）** | 算法 AES-256-GCM（Node crypto 原生）；密钥 `IDCARD_AES_KEY`（32 字节 base64）存 .env 不入码；每条记录随机 12 字节 IV；存储格式 `base64(iv).base64(ciphertext+authTag)` 存 users.id_card_no_enc；解密仅限打款场景（M4 finance 角色）；任何接口不返回明文/全号，展示一律脱敏（姓名「张*三」）；日志禁打实名与身份证号 |
 | 日志 | 请求日志 + 业务日志分离；佣金/支付/提现操作全量留痕 |

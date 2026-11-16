@@ -1,0 +1,24 @@
+# 依赖
+node_modules/
+
+# 环境与密钥（红线：永不入库）
+.env
+.env.*
+*.pem
+*.p12
+apiclient_key.pem
+apiclient_cert.pem
+
+# 构建产物
+dist/
+build/
+miniprogram_npm/
+
+# 日志与临时文件
+*.log
+tmp/
+.DS_Store
+Thumbs.db
+
+# 会话级工作数据（不上传仓库）
+.workbuddy/

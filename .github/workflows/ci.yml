@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # M0.4 将按 AGENTS.md §8 门禁补齐：ESLint、单元测试、行数检查
+      # 当前为连通性验证占位，门禁补齐后本占位必须替换
+      - name: Placeholder gate (to be replaced in M0.4)
+        run: echo "CI pipeline connected. Real gates land in M0.4."

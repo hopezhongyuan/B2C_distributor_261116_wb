@@ -33,8 +33,20 @@ Page({
         }));
         this.setData({ products, loading: false });
       })
-      .catch((e) => this.setData({ loading: false, error: e.msg || '加载失败' }))
-      .then(() => done && done());
+      .catch((e) => {
+        // 错误带上下文（msg + code），避免吞掉真实原因
+        const detail = (e && e.msg) || (e && e.errMsg) || '加载失败';
+        const code = e && e.code ? '(' + e.code + ')' : '';
+        this.setData({ loading: false, error: detail + code });
+      })
+      .then(() => {
+        if (typeof done === 'function') done();
+      });
+  },
+
+  // 重试按钮入口：bindtap 会传入 event 对象，不能直接绑 fetchList
+  retry() {
+    this.fetchList();
   },
 
   goDetail(e) {

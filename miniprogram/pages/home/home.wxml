@@ -5,7 +5,7 @@
 
 <view wx:if="{{loading}}" class="empty-box">加载中…</view>
 <view wx:elif="{{error}}" class="empty-box">{{error}}
-  <view class="btn-retry" bindtap="fetchList">重试</view>
+  <view class="btn-retry" bindtap="retry">重试</view>
 </view>
 <view wx:elif="{{products.length === 0}}" class="empty-box">暂无商品，敬请期待</view>
 

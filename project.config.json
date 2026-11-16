@@ -1,0 +1,32 @@
+{
+  "description": "B2C 二级分销小程序（工程配置见 AGENTS.md）",
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "node_modules" }
+    ]
+  },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.4.10",
+  "appid": "wx04619aa796c2188f",
+  "projectname": "B2C_distributor_261116_wb",
+  "condition": {},
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
+  },
+  "miniprogramRoot": "miniprogram/"
+}

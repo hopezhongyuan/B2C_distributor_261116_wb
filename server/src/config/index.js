@@ -1,0 +1,43 @@
+// 环境配置加载：所有敏感信息只从 .env 读取（AGENTS.md §6 安全红线 #4）
+require('dotenv').config();
+
+function required(name) {
+  const v = process.env[name];
+  if (!v && process.env.NODE_ENV === 'production') {
+    throw new Error('missing required env: ' + name);
+  }
+  return v || '';
+}
+
+module.exports = {
+  env: process.env.NODE_ENV || 'development',
+  port: parseInt(process.env.PORT || '3000', 10),
+
+  db: {
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    name: process.env.DB_NAME || 'b2c_distributor',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || ''
+  },
+
+  jwt: {
+    secret: required('JWT_SECRET'),
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+  },
+
+  wx: {
+    appid: process.env.WX_APPID || '',
+    secret: required('WX_SECRET')
+  },
+
+  wxpay: {
+    mchid: process.env.WXPAY_MCHID || '',
+    serial: process.env.WXPAY_SERIAL || '',
+    apiv3Key: process.env.WXPAY_APIV3_KEY || '',
+    privateKeyPath: process.env.WXPAY_PRIVATE_KEY_PATH || '',
+    notifyUrl: process.env.WXPAY_NOTIFY_URL || ''
+  },
+
+  uploadDir: process.env.UPLOAD_DIR || 'uploads'
+};

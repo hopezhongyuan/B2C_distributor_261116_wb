@@ -1,0 +1,5 @@
+<view class="container">
+  <view class="title">精选商城</view>
+  <view class="desc">{{motto}}</view>
+  <view class="meta">API: {{apiBase}}</view>
+</view>

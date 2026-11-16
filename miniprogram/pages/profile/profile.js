@@ -27,5 +27,13 @@ Page({
   copyUserId() {
     if (!this.data.userId) return;
     wx.setClipboardData({ data: String(this.data.userId) });
+  },
+
+  goDistribution() {
+    if (!this.data.loggedIn) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: '/pages/commission/commission' });
   }
 });

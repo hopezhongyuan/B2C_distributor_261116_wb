@@ -1,0 +1,35 @@
+<view class="card head">
+  <view class="head-cell {{level === 1 ? 'head-active' : ''}}" data-level="1" bindtap="switchLevel">
+    <view class="head-num">{{counts.teamL1Count}}</view>
+    <view class="head-label">直邀好友</view>
+  </view>
+  <view class="head-divider"></view>
+  <view class="head-cell {{level === 2 ? 'head-active' : ''}}" data-level="2" bindtap="switchLevel">
+    <view class="head-num">{{counts.teamL2Count}}</view>
+    <view class="head-label">二级团队</view>
+  </view>
+</view>
+
+<view wx:if="{{loading}}" class="state">加载中…</view>
+<view wx:elif="{{error}}" class="state">
+  <view class="state-err">{{error}}</view>
+  <view class="btn-retry" bindtap="retry">重试</view>
+</view>
+<block wx:else>
+  <view wx:if="{{!items.length}}" class="state text-secondary">
+    {{level === 1 ? '还没有直邀好友，去分享商品邀请吧' : '二级团队暂无成员'}}
+  </view>
+  <view wx:for="{{items}}" wx:key="userId" class="card member">
+    <view class="avatar">{{item.nickname[0]}}</view>
+    <view class="member-main">
+      <view class="member-name">{{item.nickname}}</view>
+      <view class="text-secondary member-sub">{{item.joinedText}} 加入 · 下单 {{item.directOrders}} 单</view>
+    </view>
+    <view class="member-right">
+      <view class="member-amount">+{{item.contributionText}}</view>
+      <view class="text-secondary member-label">为我贡献</view>
+    </view>
+  </view>
+  <view wx:if="{{loadingMore}}" class="state text-secondary">加载中…</view>
+  <view wx:elif="{{!hasMore && items.length}}" class="state text-secondary">没有更多了</view>
+</block>

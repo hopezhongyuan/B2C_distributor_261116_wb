@@ -1,0 +1,43 @@
+<view wx:if="{{loading}}" class="state">加载中…</view>
+<view wx:elif="{{error}}" class="state">
+  <view class="state-err">{{error}}</view>
+  <view class="btn-retry" bindtap="retry">重试</view>
+</view>
+<block wx:else>
+  <view class="card hero">
+    <view class="hero-label">累计佣金（元）</view>
+    <view class="hero-amount">{{summary.totalText}}</view>
+    <view class="hero-tip text-secondary">可提现 {{summary.availableText}} 元 · 提现功能 M3 上线</view>
+  </view>
+
+  <view class="grid">
+    <view class="grid-cell"><view class="num">{{summary.frozenText}}</view><view class="label text-secondary">冻结中</view></view>
+    <view class="grid-cell"><view class="num">{{summary.withdrawingText}}</view><view class="label text-secondary">提现中</view></view>
+    <view class="grid-cell"><view class="num">{{summary.paidText}}</view><view class="label text-secondary">已到账</view></view>
+    <view class="grid-cell" bindtap="goTeam"><view class="num">›</view><view class="label text-secondary">我的团队</view></view>
+  </view>
+
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab {{activeTab === item.key ? 'tab-active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchTab"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{!items.length}}" class="state text-secondary">暂无佣金记录，分享商品给好友开始赚钱吧</view>
+  <view wx:for="{{items}}" wx:key="commissionId" class="card item">
+    <view class="item-main">
+      <view class="item-title">{{item.orderTitle}}</view>
+      <view class="text-secondary item-sub">{{item.levelLabel}} · 买家 {{item.buyerNickname}} · {{item.timeText}}</view>
+    </view>
+    <view class="item-right">
+      <view class="item-amount">+{{item.amountText}}</view>
+      <view class="tag tag-{{item.status}}">{{item.status === 'FROZEN' ? '冻结中' : item.status === 'AVAILABLE' ? '可提现' : item.status === 'PAID' ? '已到账' : item.status === 'WITHDRAWING' ? '提现中' : '已作废'}}</view>
+    </view>
+  </view>
+  <view wx:if="{{loadingMore}}" class="state text-secondary">加载中…</view>
+  <view wx:elif="{{!hasMore && items.length}}" class="state text-secondary">没有更多了</view>
+</block>

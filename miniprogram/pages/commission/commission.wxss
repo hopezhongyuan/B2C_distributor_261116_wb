@@ -1,0 +1,91 @@
+/* 分销中心：佣金汇总 + 明细（教育蓝 #2E6BE6 主色） */
+.state {
+  padding: 80rpx 0;
+  text-align: center;
+  font-size: 28rpx;
+}
+.state-err {
+  color: #86909C;
+  margin-bottom: 24rpx;
+}
+.btn-retry {
+  display: inline-block;
+  padding: 12rpx 48rpx;
+  background: #2E6BE6;
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  margin: 20rpx 24rpx;
+  padding: 28rpx;
+}
+
+.hero {
+  background: linear-gradient(135deg, #2E6BE6, #5A8DF0);
+  color: #fff;
+  text-align: center;
+  padding: 44rpx 28rpx 36rpx;
+}
+.hero-label { font-size: 26rpx; opacity: 0.85; }
+.hero-amount { font-size: 64rpx; font-weight: 700; margin: 12rpx 0; }
+.hero-tip { font-size: 22rpx; opacity: 0.8; color: #fff; }
+
+.grid {
+  display: flex;
+  background: #fff;
+  border-radius: 16rpx;
+  margin: 0 24rpx;
+  padding: 24rpx 0;
+}
+.grid-cell {
+  flex: 1;
+  text-align: center;
+}
+.grid-cell:last-child .num { color: #2E6BE6; }
+.num { font-size: 34rpx; font-weight: 600; color: #1D2129; }
+.label { font-size: 22rpx; margin-top: 6rpx; }
+
+.tabs {
+  display: flex;
+  gap: 16rpx;
+  margin: 24rpx 24rpx 8rpx;
+}
+.tab {
+  padding: 10rpx 28rpx;
+  background: #fff;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #4E5969;
+}
+.tab-active {
+  background: #2E6BE6;
+  color: #fff;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16rpx 24rpx;
+  padding: 24rpx 28rpx;
+}
+.item-title { font-size: 28rpx; color: #1D2129; }
+.item-sub { font-size: 22rpx; margin-top: 8rpx; }
+.item-right { text-align: right; }
+.item-amount { font-size: 32rpx; font-weight: 600; color: #FF8F1F; }
+.tag {
+  display: inline-block;
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  background: #F2F3F5;
+  color: #86909C;
+}
+.tag-FROZEN { background: #FFF7E8; color: #FF8F1F; }
+.tag-AVAILABLE { background: #E8F3FF; color: #2E6BE6; }
+.tag-PAID { background: #E8FFEA; color: #00B42A; }

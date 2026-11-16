@@ -14,7 +14,8 @@ router.use('/products', require('./product')); // 契约 docs/api/product.md
 // M1: router.use('/orders', require('./order'));
 router.use('/orders', require('./order')); // 契约 docs/api/order.md
 router.use('/payment', require('./payment')); // 契约 docs/api/order.md notify
-// M2: router.use('/commissions', require('./commission'));
+router.use('/relations', require('./relation')); // 契约 docs/api/relation.md
+router.use('/commissions', require('./commission')); // 契约 docs/api/commission.md
 // M3: router.use('/withdrawals', require('./withdraw'));
 // M4: router.use('/admin', require('./admin'));
 

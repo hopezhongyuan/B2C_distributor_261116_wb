@@ -6,7 +6,9 @@
     "pages/product-detail/product-detail",
     "pages/checkout/checkout",
     "pages/order-list/order-list",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/commission/commission",
+    "pages/team/team"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",

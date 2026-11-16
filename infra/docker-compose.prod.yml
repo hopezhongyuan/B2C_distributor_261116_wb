@@ -39,6 +39,7 @@ services:
       WXPAY_APIV3_KEY: ${WXPAY_APIV3_KEY}
       WXPAY_PRIVATE_KEY_PATH: ${WXPAY_PRIVATE_KEY_PATH}
       WXPAY_NOTIFY_URL: ${WXPAY_NOTIFY_URL}
+      WXPAY_PUBLIC_KEY_PATH: ${WXPAY_PUBLIC_KEY_PATH}
       UPLOAD_DIR: /app/uploads
     volumes:
       - uploads:/app/uploads

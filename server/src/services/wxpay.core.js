@@ -9,6 +9,7 @@ const ERRORS = require('../config/errors');
 const API_HOST = 'api.mch.weixin.qq.com';
 const certCache = new Map(); // serial -> public key object
 let privateKeyCache = null;
+let wxPublicKeyCache = null; // 微信支付公钥（新商户公钥模式）
 
 function assertConfigured() {
   const c = config.wxpay;
@@ -104,16 +105,31 @@ async function ensurePlatformCerts(force) {
   await fetchPlatformCerts();
 }
 
+/** 微信支付公钥（公钥模式：回调头 Wechatpay-Serial 形如 PUB_KEY_ID_xxx） */
+function loadWechatPayPublicKey() {
+  if (!config.wxpay.publicKeyPath) return null;
+  if (!wxPublicKeyCache) {
+    wxPublicKeyCache = crypto.createPublicKey(fs.readFileSync(config.wxpay.publicKeyPath));
+  }
+  return wxPublicKeyCache;
+}
+
 /** 回调验签（Wechatpay-Signature 覆盖 ts\nnonce\nbody\n），失败抛错 */
 async function verifyNotifySignature(headers, rawBodyStr) {
   const serial = headers['wechatpay-serial'];
+  console.log('[wxpay] notify serial:', serial);
   let publicKey = certCache.get(serial);
+  if (!publicKey && serial && String(serial).indexOf('PUB_KEY_ID_') === 0) {
+    // 公钥模式：序列号是微信支付公钥 ID，不在 /v3/certificates 列表中
+    publicKey = loadWechatPayPublicKey();
+    if (!publicKey) throw { code: ERRORS.WX_API_ERROR, msg: '回调为公钥模式但未配置 WXPAY_PUBLIC_KEY_PATH' };
+  }
   if (!publicKey) {
-    // 序列号未命中缓存 → 微信可能轮换了平台证书，强制重新拉取后再验（官方推荐做法）
+    // 平台证书模式：未命中缓存 → 微信可能轮换了证书，强制刷新后再验
     await ensurePlatformCerts(true);
     publicKey = certCache.get(serial);
   }
-  if (!publicKey) throw { code: ERRORS.WX_API_ERROR, msg: '未知平台证书序列号' };
+  if (!publicKey) throw { code: ERRORS.WX_API_ERROR, msg: '未知平台证书序列号: ' + serial };
   const message = `${headers['wechatpay-timestamp']}\n${headers['wechatpay-nonce']}\n${rawBodyStr}\n`;
   const okVerify = crypto
     .createVerify('RSA-SHA256').update(message)
@@ -125,6 +141,7 @@ async function verifyNotifySignature(headers, rawBodyStr) {
 function resetCaches() {
   certCache.clear();
   privateKeyCache = null;
+  wxPublicKeyCache = null;
 }
 
 module.exports = { assertConfigured, signWithPrivateKey, buildAuthorization, apiRequest, decryptAesGcm, verifyNotifySignature, resetCaches };

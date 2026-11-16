@@ -44,6 +44,8 @@ db.Order.hasMany(db.OrderItem, { foreignKey: 'order_id' });
 db.OrderItem.belongsTo(db.Order, { foreignKey: 'order_id' });
 db.Order.hasMany(db.Commission, { foreignKey: 'order_id' });
 db.Commission.belongsTo(db.User, { foreignKey: 'beneficiary_id', as: 'beneficiary' });
+db.User.hasMany(db.Withdrawal, { foreignKey: 'user_id' });
+db.Withdrawal.belongsTo(db.User, { foreignKey: 'user_id' });
 
 async function assertConnection() {
   await sequelize.authenticate();

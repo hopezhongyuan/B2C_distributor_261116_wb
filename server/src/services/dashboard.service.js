@@ -1,6 +1,7 @@
 // dashboard.service.js — 数据看板（只读聚合，M4 收官项）
 // 契约：docs/api/admin.md §12；口径铁律见下，前端只做展示不做二次计算
-const { Sequelize, Order, Commission } = require('../models');
+const { Order, Commission } = require('../models');
+const { Op, Sequelize } = require('sequelize'); // 铁律：Op/Sequelize 从包取，models/index 不导出类
 
 // 有效支付口径：钱已实收且未全额退回（REFUNDING 仍计入——资金在途；REFUNDED 全退不计）
 const VALID_PAID_STATUS = ['PAID', 'DELIVERED', 'COMPLETED', 'REDEEMED', 'REFUNDING', 'PARTIAL_REFUNDED'];
@@ -35,7 +36,7 @@ function fillTrendDays(rows, days = TREND_DAYS, now = new Date()) {
 
 /** GET /admin/dashboard：总览 + 漏斗 + 近 14 天趋势 */
 async function overview() {
-  const validPaid = { status: { [Sequelize.Op.in]: VALID_PAID_STATUS } };
+  const validPaid = { status: { [Op.in]: VALID_PAID_STATUS } };
 
   // GMV 与有效支付单数（单次聚合）
   const [gmvRow] = await Order.findAll({
@@ -61,7 +62,7 @@ async function overview() {
 
   // 佣金：已支出（PAID）与产生总额（非 VOID）
   const commRows = await Commission.findAll({
-    where: { status: { [Sequelize.Op.ne]: 'VOID' } },
+    where: { status: { [Op.ne]: 'VOID' } },
     attributes: [
       'status',
       [Sequelize.fn('SUM', Sequelize.col('amount_cents')), 'total']
@@ -79,7 +80,7 @@ async function overview() {
 
   // 近 14 天趋势（按支付时间归属当天）
   const trendRows = await Order.findAll({
-    where: { ...validPaid, payTime: { [Sequelize.Op.ne]: null } },
+    where: { ...validPaid, payTime: { [Op.ne]: null } },
     attributes: [
       [Sequelize.fn('DATE', Sequelize.col('pay_time')), 'day'],
       [Sequelize.fn('COALESCE', Sequelize.fn('SUM', Sequelize.col('payable_cents')), 0), 'gmvCents'],

@@ -40,5 +40,7 @@ module.exports = {
     notifyUrl: process.env.WXPAY_NOTIFY_URL || ''
   },
 
-  uploadDir: process.env.UPLOAD_DIR || 'uploads'
+  uploadDir: process.env.UPLOAD_DIR || 'uploads',
+  // 核销等管理操作的临时 token（M4 换 RBAC 后移除）
+  adminApiToken: process.env.ADMIN_API_TOKEN || ''
 };

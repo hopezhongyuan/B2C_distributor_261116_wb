@@ -9,9 +9,11 @@ router.get('/health', (_req, res) => {
   ok(res, { status: 'up', time: new Date().toISOString() });
 });
 
-// M1: router.use('/auth', require('./auth'));
-// M1: router.use('/products', require('./product'));
+router.use('/auth', require('./auth')); // 契约 docs/api/auth.md
+router.use('/products', require('./product')); // 契约 docs/api/product.md
 // M1: router.use('/orders', require('./order'));
+router.use('/orders', require('./order')); // 契约 docs/api/order.md
+router.use('/payment', require('./payment')); // 契约 docs/api/order.md notify
 // M2: router.use('/commissions', require('./commission'));
 // M3: router.use('/withdrawals', require('./withdraw'));
 // M4: router.use('/admin', require('./admin'));

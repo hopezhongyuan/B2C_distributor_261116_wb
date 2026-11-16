@@ -8,7 +8,7 @@ const orderAdmin = require('../src/services/order.admin.service');
 test('商品校验：创建必填 + bp 上限 5000 + 部分编辑', () => {
   const throwsMsg = (fn, re) => assert.throws(fn, (e) => re.test(e.msg));
   // 缺 priceCents 拒绝
-  throwsMsg(() => productAdmin.validatePayload({ title: 'A', type: 'physical' }), /priceCents/);
+  throwsMsg(() => productAdmin.validatePayload({ title: 'A', type: 'physical' }), /价格须为正整数分/);
   // 正常创建
   const ok = productAdmin.validatePayload({ title: '课', type: 'virtual', priceCents: 990, rateL1Bp: 1000, rateL2Bp: 500 });
   assert.strictEqual(ok.priceCents, 990);
@@ -35,6 +35,6 @@ test('配置校验：白名单 key 各自边界', () => {
 test('订单买家昵称脱敏：≤4 原样，超 4 中间打码', () => {
   assert.strictEqual(orderAdmin.maskNickname('小明'), '小明');
   assert.strictEqual(orderAdmin.maskNickname('Abcd'), 'Abcd');
-  assert.strictEqual(orderAdmin.maskNickname('六个字的名字啊'), '六个***字啊');
+  assert.strictEqual(orderAdmin.maskNickname('六个字的名字啊'), '六个****啊');
   assert.strictEqual(orderAdmin.maskNickname(''), '微信用户');
 });

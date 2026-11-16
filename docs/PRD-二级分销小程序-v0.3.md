@@ -178,7 +178,8 @@ tabBar（建议 4 个）
 | 7 | 小程序端语言与 UI | **原生 JS + TDesign 小程序组件库** |
 | 8 | 后端方案 | **自建：阿里云 ECS + Node.js LTS + MySQL 8**，REST API，支付走微信支付 API v3 |
 | 9 | 管理后台部署与鉴权 | **独立服务器部署**（Vue3 + TDesign Vue），管理员账号 RBAC + JWT |
-| 10 | 部署硬前提 | 服务器域名 ICP 备案 + HTTPS，配置为小程序 request 合法域名 |
+| 10 | 部署硬前提 | **已满足**：域名 `test2.aition.art` ICP 备案 + Caddy 自动 HTTPS（2026-11-16 实测公网 200） |
+| 11 | 里程碑 M0 完成 | 2026-11-16 登记：工程骨架三端就绪、CI 真门禁（lint/test/行数）绿灯、服务端已部署 ECS（Docker + MySQL 容器 + Caddy 反代），`https://test2.aition.art/api/health` 公网可用 |
 
 ---
 

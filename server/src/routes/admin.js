@@ -30,9 +30,11 @@ router.get('/refunds', requireAdmin, asyncHandler(ctrl.refundList));
 router.post('/refunds/:id/audit', requireAdmin, requireRole(FIN), asyncHandler(ctrl.refundAudit));
 router.post('/refunds/:id/retry', requireAdmin, requireRole(FIN), asyncHandler(ctrl.refundRetry));
 
-// 分销员管理（M4）
+// 分销员管理（M4 + 批次C 深查）
 router.get('/distributors', requireAdmin, asyncHandler(ctrl.distributorList));
+router.get('/distributors/:id/detail', requireAdmin, asyncHandler(ctrl.distributorDetail));
 router.post('/distributors/:id/status', requireAdmin, requireRole(OPS), asyncHandler(ctrl.distributorStatus));
+router.get('/relations', requireAdmin, asyncHandler(ctrl.relationList));
 
 // 佣金管理（M4 尾项，只读总览）
 router.get('/commissions/summary', requireAdmin, asyncHandler(ctrl.commissionSummary));

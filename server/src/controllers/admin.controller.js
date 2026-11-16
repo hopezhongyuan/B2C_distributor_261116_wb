@@ -73,6 +73,12 @@ async function distributorList(req, res) {
 async function distributorStatus(req, res) {
   return ok(res, await userAdmin.setStatus(numId(req.params.id), (req.body || {}).status, req.admin));
 }
+async function distributorDetail(req, res) {
+  return ok(res, await userAdmin.detail(numId(req.params.id)));
+}
+async function relationList(req, res) {
+  return ok(res, await userAdmin.listRelations({ userId: req.query.userId, ...pageArgs(req) }));
+}
 
 // —— 佣金管理（只读，M4 尾项） ——
 async function commissionSummary(req, res) {
@@ -112,7 +118,7 @@ async function configUpdate(req, res) {
 module.exports = {
   login, withdrawList, withdrawReview, withdrawSync,
   productList, productCreate, productUpdate, productStatus,
-  orderList, orderRedeem, distributorList, distributorStatus,
+  orderList, orderRedeem, distributorList, distributorStatus, distributorDetail, relationList,
   commissionSummary, commissionList, dashboard,
   refundList, refundAudit, refundRetry,
   configList, configUpdate

@@ -35,6 +35,7 @@ const menus = [
   { path: '/products', title: '商品管理' },
   { path: '/orders', title: '订单管理' },
   { path: '/distribution', title: '分销管理' },
+  { path: '/relations', title: '绑定查询' },
   { path: '/commissions', title: '佣金管理' },
   { path: '/withdrawals', title: '提现审核' },
   { path: '/refunds', title: '退款审核' },

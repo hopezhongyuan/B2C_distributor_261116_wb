@@ -12,6 +12,7 @@ const routes = [
       { path: 'products', name: 'products', component: () => import('../views/ProductManage.vue'), meta: { title: '商品管理', module: 'product' } },
       { path: 'orders', name: 'orders', component: () => import('../views/OrderManage.vue'), meta: { title: '订单管理', module: 'order' } },
       { path: 'distribution', name: 'distribution', component: () => import('../views/DistributorManage.vue'), meta: { title: '分销管理', module: 'distribution' } },
+      { path: 'relations', name: 'relations', component: () => import('../views/RelationAudit.vue'), meta: { title: '绑定查询', module: 'relation' } },
       { path: 'commissions', name: 'commissions', component: () => import('../views/CommissionManage.vue'), meta: { title: '佣金管理', module: 'commission' } },
       { path: 'withdrawals', name: 'withdrawals', component: () => import('../views/WithdrawAudit.vue'), meta: { title: '提现审核', module: 'withdraw' } },
       { path: 'refunds', name: 'refunds', component: () => import('../views/RefundAudit.vue'), meta: { title: '退款审核', module: 'refund' } },

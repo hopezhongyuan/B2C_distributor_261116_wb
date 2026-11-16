@@ -295,3 +295,11 @@ APPROVED 状态重试打款（同 refundNo 幂等）。权限同上。
 ## 14. 预留（后续迭代）
 
 RBAC 细粒度权限点、操作审计表、Redis 登录限流。
+
+### GET /admin/distributors/:id/detail（批次C）
+
+分销员详情：上级链 + 两级团队（l1=绑定我的用户，l2=一级团队的邀请，via=经谁邀请）+ 汇总（commission 按状态 / withdraw 按状态 / debtCents 欠款）。读=全部。
+
+### GET /admin/relations?userId=&page=&pageSize=（批次C）
+
+绑定审计：invitee/inviter 昵称+ID、sourceScene、时间；userId 可选（查该用户作为任一方的全部绑定）。读=全部。

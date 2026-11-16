@@ -20,6 +20,7 @@
         </t-tag>
       </template>
       <template #op="{ row }">
+        <t-button size="small" variant="outline" style="margin-right:8px" @click="openDetail(row)">详情</t-button>
         <t-popconfirm v-if="row.distributorStatus === 'active'"
           content="封禁后该用户不再产生新佣金（冻结佣金待裁决），确认？" @confirm="setStatus(row, 'banned')">
           <t-button size="small" theme="danger" variant="outline">封禁</t-button>
@@ -27,6 +28,29 @@
         <t-button v-else size="small" theme="success" variant="outline" @click="setStatus(row, 'active')">解封</t-button>
       </template>
     </t-table>
+
+    <t-dialog v-model:visible="detailVisible" :header="detail ? `分销员详情 · ${detail.nickname}` : '详情'" width="680px" :footer="false">
+      <div v-if="detail" class="detail">
+        <div class="sec">
+          <div class="sec-title">基础</div>
+          <div>ID {{ detail.userId }} · 状态 {{ detail.distributorStatus === 'active' ? '正常' : '已封禁' }}
+            <span v-if="detail.realNameMasked"> · 实名 {{ detail.realNameMasked }}</span>
+            <span v-if="detail.debtCents > 0" class="debt"> · 欠款 ¥{{ fen(detail.debtCents) }}</span></div>
+          <div v-if="detail.inviter">上级：{{ detail.inviter.nickname }}（ID {{ detail.inviter.userId }}）</div>
+          <div class="dim">佣金 可提 ¥{{ fen(detail.summary.commission.AVAILABLE) }} / 冻结 ¥{{ fen(detail.summary.commission.FROZEN) }} / 已到账 ¥{{ fen(detail.summary.commission.PAID) }}；提现在途 ¥{{ fen((detail.summary.withdraw.pending || 0) + (detail.summary.withdraw.approved || 0)) }} / 已到账 ¥{{ fen(detail.summary.withdraw.paid) }}</div>
+        </div>
+        <div class="sec">
+          <div class="sec-title">一级团队（{{ detail.team.l1.length }}）</div>
+          <div v-if="!detail.team.l1.length" class="dim">暂无</div>
+          <div v-for="m in detail.team.l1" :key="m.userId" class="member">{{ m.nickname }}（ID {{ m.userId }}）<t-tag size="small" :theme="m.status === 'active' ? 'success' : 'danger'">{{ m.status === 'active' ? '正常' : '封禁' }}</t-tag></div>
+        </div>
+        <div class="sec">
+          <div class="sec-title">二级团队（{{ detail.team.l2.length }}）</div>
+          <div v-if="!detail.team.l2.length" class="dim">暂无</div>
+          <div v-for="m in detail.team.l2" :key="m.userId" class="member">{{ m.nickname }}（ID {{ m.userId }}）<span class="dim">经 {{ m.via }} 邀请</span></div>
+        </div>
+      </div>
+    </t-dialog>
   </t-card>
 </template>
 
@@ -83,9 +107,26 @@ async function setStatus(row, distributorStatus) {
   }
 }
 
+const detailVisible = ref(false);
+const detail = ref(null);
+
+async function openDetail(row) {
+  try {
+    const { data } = await http.get(`/admin/distributors/${row.userId}/detail`);
+    detail.value = data;
+    detailVisible.value = true;
+  } catch (e) {
+    MessagePlugin.error(e.msg || '加载失败');
+  }
+}
+
 onMounted(() => load());
 </script>
 
 <style scoped>
 .dim { color: #999; margin-left: 8px; font-size: 12px; }
+.detail .sec { margin-bottom: 16px; }
+.detail .sec-title { font-weight: 600; margin-bottom: 6px; }
+.detail .member { padding: 3px 0; font-size: 13px; }
+.debt { color: #d54941; }
 </style>

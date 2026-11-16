@@ -46,7 +46,8 @@ module.exports = {
     privateKeyPath: process.env.WXPAY_PRIVATE_KEY_PATH || '',
     notifyUrl: process.env.WXPAY_NOTIFY_URL || '',
     // 微信支付公钥模式（2024.10 后新商户默认）：公钥 PEM 文件路径，serial 形如 PUB_KEY_ID_xxx
-    publicKeyPath: process.env.WXPAY_PUBLIC_KEY_PATH || ''
+    publicKeyPath: process.env.WXPAY_PUBLIC_KEY_PATH || '',
+    publicKeyId: process.env.WXPAY_PUBLIC_KEY_ID || ''
   },
 
   uploadDir: process.env.UPLOAD_DIR || 'uploads',

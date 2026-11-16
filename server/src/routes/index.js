@@ -18,6 +18,6 @@ router.use('/relations', require('./relation')); // 契约 docs/api/relation.md
 router.use('/commissions', require('./commission')); // 契约 docs/api/commission.md
 router.use('/user', require('./user')); // 契约 docs/api/user.md
 router.use('/withdraws', require('./withdraw')); // 契约 docs/api/withdraw.md
-// M4: router.use('/admin', require('./admin'));
+router.use('/admin', require('./admin')); // 契约 docs/api/admin.md（M3.4 提现管理先行，M4 扩展）
 
 module.exports = router;

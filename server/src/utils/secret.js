@@ -57,11 +57,30 @@ function genWithdrawNo() {
   return 'W' + Date.now().toString(36) + crypto.randomBytes(5).toString('hex');
 }
 
+// —— 管理员密码（Node 内置 scrypt，零依赖；格式 scrypt$<salt>$<hash>）——
+const SCRYPT_KEYLEN = 32;
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(String(password), salt, SCRYPT_KEYLEN).toString('hex');
+  return `scrypt$${salt}$${hash}`;
+}
+
+function verifyPassword(password, stored) {
+  const parts = String(stored || '').split('$');
+  if (parts.length !== 3 || parts[0] !== 'scrypt') return false;
+  const hash = crypto.scryptSync(String(password), parts[1], SCRYPT_KEYLEN);
+  const expect = Buffer.from(parts[2], 'hex');
+  return hash.length === expect.length && crypto.timingSafeEqual(hash, expect);
+}
+
 module.exports = {
   validateIdCardNo,
   validateRealName,
   encryptIdCard,
   decryptIdCard,
   maskRealName,
-  genWithdrawNo
+  genWithdrawNo,
+  hashPassword,
+  verifyPassword
 };

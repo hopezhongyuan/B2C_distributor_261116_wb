@@ -44,8 +44,8 @@ function buildAuthorization(method, canonicalUrl, bodyStr) {
   );
 }
 
-/** v3 API 请求（2xx 返回 JSON，否则抛错） */
-function apiRequest(method, path, bodyObj) {
+/** v3 API 请求（2xx 返回 JSON，否则抛错）；extraHeaders 用于 Wechatpay-Serial 等声明头 */
+function apiRequest(method, path, bodyObj, extraHeaders) {
   const bodyStr = bodyObj ? JSON.stringify(bodyObj) : '';
   return new Promise((resolve, reject) => {
     const req = https.request(
@@ -55,7 +55,8 @@ function apiRequest(method, path, bodyObj) {
           Authorization: buildAuthorization(method, path, bodyStr),
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'User-Agent': 'b2c-distributor/1.0'
+          'User-Agent': 'b2c-distributor/1.0',
+          ...(extraHeaders || {})
         }
       },
       (res) => {
@@ -137,6 +138,33 @@ async function verifyNotifySignature(headers, rawBodyStr) {
   if (!okVerify) throw { code: ERRORS.WX_API_ERROR, msg: '回调验签失败' };
 }
 
+/** 获取敏感字段加密密钥（公钥模式优先，否则平台证书最新一张），返回 { serial, publicKey } */
+async function getApiEncryptKey() {
+  const pub = loadWechatPayPublicKey();
+  if (pub && config.wxpay.publicKeyId) {
+    return { serial: config.wxpay.publicKeyId, publicKey: pub };
+  }
+  await ensurePlatformCerts(false);
+  let serial = null;
+  let publicKey = null;
+  for (const [s, k] of certCache) {
+    serial = s;
+    publicKey = k; // Map 保持插入序，取最新一张
+  }
+  if (!publicKey) throw { code: ERRORS.WX_API_ERROR, msg: '无可用加密密钥' };
+  return { serial, publicKey };
+}
+
+/** RSA-OAEP-SHA1 加密敏感字段（商家转账 user_name 等），输出 base64 */
+function rsaEncryptSensitive(publicKey, plaintext) {
+  return crypto
+    .publicEncrypt(
+      { key: publicKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING, oaepHash: 'sha1' },
+      Buffer.from(plaintext, 'utf8')
+    )
+    .toString('base64');
+}
+
 /** 供单测注入：清空证书缓存 */
 function resetCaches() {
   certCache.clear();
@@ -144,4 +172,4 @@ function resetCaches() {
   wxPublicKeyCache = null;
 }
 
-module.exports = { assertConfigured, signWithPrivateKey, buildAuthorization, apiRequest, decryptAesGcm, verifyNotifySignature, resetCaches };
+module.exports = { assertConfigured, signWithPrivateKey, buildAuthorization, apiRequest, decryptAesGcm, verifyNotifySignature, getApiEncryptKey, rsaEncryptSensitive, resetCaches };

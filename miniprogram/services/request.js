@@ -74,6 +74,20 @@ function parseInviterFromLaunch(launchOptions) {
   return Number.isInteger(inviterId) && inviterId > 0 ? inviterId : undefined;
 }
 
+// 待绑定邀请人持久化：登录失败或下次登录时仍可补投（服务端先到先得裁决，重复上报无害）
+const INVITER_KEY = 'pendingInviterId';
+
+function setPendingInviter(launchOptions) {
+  const v = parseInviterFromLaunch(launchOptions);
+  if (v) wx.setStorageSync(INVITER_KEY, v);
+  return v;
+}
+
+function getPendingInviter() {
+  const n = parseInt(wx.getStorageSync(INVITER_KEY), 10);
+  return Number.isInteger(n) && n > 0 ? n : undefined;
+}
+
 let loginPromise = null;
 
 /**
@@ -82,11 +96,12 @@ let loginPromise = null;
 function ensureLogin(inviterId) {
   if (getToken()) return Promise.resolve(true);
   if (!loginPromise) {
+    const inv = inviterId || getPendingInviter();
     loginPromise = getWxCode()
       .then((code) => request({
         url: '/auth/login',
         method: 'POST',
-        data: { code, inviterId, scene: 'miniprogram' }
+        data: { code, inviterId: inv, scene: 'miniprogram' }
       }))
       .then((data) => {
         setToken(data.token);
@@ -102,12 +117,15 @@ function ensureLogin(inviterId) {
   return loginPromise;
 }
 
-// app 启动：带参进入时先解析邀请人，登录时一并上报（先到先得绑定，服务端裁决）
+// app 启动/热启动：带参进入时先解析邀请人存档，登录时一并上报（先到先得绑定，服务端裁决）
 function initLaunch(launchOptions) {
-  const inviterId = parseInviterFromLaunch(launchOptions);
-  ensureLogin(inviterId).catch(() => {
-    // 静默失败：浏览类页面不依赖登录，下单时再引导
+  setPendingInviter(launchOptions);
+  ensureLogin().catch(() => {
+    // 静默失败：浏览类页面不依赖登录，下单时再引导；邀请参数已存档待补投
   });
 }
 
-module.exports = { request, ensureLogin, getToken, getUserId, setToken, initLaunch, parseInviterFromLaunch };
+module.exports = {
+  request, ensureLogin, getToken, getUserId, setToken,
+  initLaunch, parseInviterFromLaunch, setPendingInviter, getPendingInviter
+};

@@ -1,6 +1,7 @@
 // 分销中心：佣金汇总四宫格 + 明细分页（契约 docs/api/commission.md）
 const commissionService = require('../../services/commission.service');
 const { fenToYuan } = require('../../utils/format');
+const { shareMessage } = require('../../utils/share');
 
 const TABS = [
   { key: '', label: '全部' },
@@ -25,6 +26,11 @@ Page({
 
   onLoad() {
     this.fetchAll();
+  },
+
+  onShareAppMessage() {
+    // 分销推广分享：好友从首页进入即绑定归属
+    return shareMessage('精选课堂', '/pages/home/home');
   },
 
   onPullDownRefresh() {

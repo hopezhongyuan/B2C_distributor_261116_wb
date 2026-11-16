@@ -1,6 +1,7 @@
 // 商品详情：实物/虚拟双模板（底部按钮与提示按类型切换）
 const productService = require('../../services/product.service');
 const cart = require('../../utils/cart');
+const { shareMessage } = require('../../utils/share');
 const { fenToParts, toImageUrl } = require('../../utils/format');
 
 Page({
@@ -70,12 +71,11 @@ Page({
 
   onShareAppMessage() {
     const { product } = this.data;
-    // 分享链接携带邀请人；绑定由服务端先到先得裁决
-    const { getUserId } = require('../../services/request');
-    const uid = getUserId();
-    return {
-      title: product ? product.title : '精选课堂',
-      path: `/pages/product-detail/product-detail?id=${this.productId}&inviterId=${uid}`
-    };
+    // 分享链接统一经 utils/share 携带邀请人；绑定由服务端先到先得裁决
+    return shareMessage(
+      product ? product.title : '精选课堂',
+      '/pages/product-detail/product-detail',
+      { id: this.productId }
+    );
   }
 });

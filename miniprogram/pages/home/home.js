@@ -1,12 +1,17 @@
 // 首页：精选商品（首批）+ 入口
 const productService = require('../../services/product.service');
 const { fenToParts, fenToYuan, toImageUrl } = require('../../utils/format');
+const { shareMessage } = require('../../utils/share');
 
 Page({
   data: {
     loading: true,
     error: '',
     products: []
+  },
+
+  onShareAppMessage() {
+    return shareMessage('精选课堂', '/pages/home/home');
   },
 
   onLoad() {

@@ -27,7 +27,7 @@ async function list({ status, orderNo, page = 1, pageSize = 20 }) {
       orderNo: o.orderNo,
       status: o.status,
       type: o.type,
-      amountCents: o.amountCents,
+      amountCents: o.payableCents, // 订单实付金额（Order 模型字段名 payableCents）
       payTime: o.payTime || null,
       createdAt: o.createdAt,
       buyerNickname: maskNickname(o.User && o.User.nickname),

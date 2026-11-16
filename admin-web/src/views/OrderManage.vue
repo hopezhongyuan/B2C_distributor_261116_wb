@@ -8,7 +8,8 @@
       <t-button style="margin-left:8px" @click="load(1)">查询</t-button>
     </template>
     <t-table :loading="loading" :columns="columns" :data="rows" row-key="id" :pagination="pagination" @page-change="onPage">
-      <template #amount="{ row }">¥{{ (row.amountCents / 100).toFixed(2) }}</template>
+      <template #amount="{ row }">¥{{ ((row.amountCents || 0) / 100).toFixed(2) }}</template>
+      <template #ctime="{ row }">{{ fmtTime(row.createdAt) }}</template>
       <template #ostatus="{ row }">
         <t-tag :theme="TAG[row.status] || 'default'">{{ STATUS[row.status] || row.status }}</t-tag>
       </template>
@@ -48,9 +49,15 @@ const columns = [
   { colKey: 'items', title: '商品', ellipsis: false },
   { colKey: 'amount', title: '金额', width: 100 },
   { colKey: 'ostatus', title: '状态', width: 90 },
-  { colKey: 'createdAt', title: '下单时间', width: 170 },
+  { colKey: 'ctime', title: '下单时间', width: 170 },
   { colKey: 'op', title: '操作', width: 100 }
 ];
+
+// ISO → 本地可读时间
+function fmtTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('zh-CN', { hour12: false });
+}
 
 async function load(page = 1) {
   loading.value = true;

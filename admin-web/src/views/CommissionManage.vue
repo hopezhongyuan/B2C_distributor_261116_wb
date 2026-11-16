@@ -4,11 +4,10 @@
     <div class="summary-row">
       <t-card v-for="s in summaryCards" :key="s.key" class="summary-card" bordered>
         <div class="summary-title">
-          <t-tag :theme="TAG_THEME[s.key] || 'default'" size="small">{{ STATUS[s.key] || s.key }}</t-tag>
-          <span v-if="s.key === 'UNSETTLED'" class="hint">冻结+可用+提现中</span>
+          <t-tag :theme="TAG_THEME[s.key] || 'default'" size="small">{{ STATUS[s.key] || (s.key === 'UNSETTLED' ? '未结算' : s.key) }}</t-tag>
         </div>
         <div class="summary-amount">¥{{ (s.amountCents / 100).toFixed(2) }}</div>
-        <div class="summary-count">{{ s.count }} 笔</div>
+        <div class="summary-count">{{ s.key === 'UNSETTLED' ? '冻结+可用+提现中 · ' + s.count + ' 笔' : s.count + ' 笔' }}</div>
       </t-card>
     </div>
 
@@ -132,11 +131,6 @@ onMounted(() => {
 .summary-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-.summary-title .hint {
-  color: #999;
-  font-size: 12px;
 }
 .summary-amount {
   font-size: 20px;

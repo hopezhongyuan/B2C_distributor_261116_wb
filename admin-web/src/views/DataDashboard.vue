@@ -104,7 +104,8 @@ onMounted(() => load());
 .funnel { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 .funnel-step { width: 100%; text-align: center; }
 .funnel-bar {
-  margin: 0 auto; min-height: 44px; border-radius: 6px; color: #fff;
+  margin: 0 auto; min-height: 44px; min-width: 130px; border-radius: 6px; color: #fff;
+  white-space: nowrap; overflow: visible;
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; transition: width 0.4s;
 }

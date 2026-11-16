@@ -30,6 +30,7 @@ Page({
           const p = pmap.get(it.productId);
           return {
             productId: it.productId,
+            spec: it.spec || '',
             quantity: it.quantity,
             invalid: !p || p.stock < 1,
             oversold: !!p && p.stock < it.quantity,
@@ -66,8 +67,8 @@ Page({
   },
 
   toggleItem(e) {
-    const id = e.currentTarget.dataset.id;
-    const items = this.data.items.map((it) => it.productId === id ? { ...it, checked: it.checked === false } : it);
+    const idx = Number(e.currentTarget.dataset.idx);
+    const items = this.data.items.map((it, i) => (i === idx ? { ...it, checked: it.checked === false } : it));
     this.setData({ items });
     this.recalc();
   },
@@ -80,20 +81,22 @@ Page({
   },
 
   onQty(e) {
-    const id = e.currentTarget.dataset.id;
+    const idx = Number(e.currentTarget.dataset.idx);
     const delta = e.currentTarget.dataset.type === 'inc' ? 1 : -1;
-    const item = this.data.items.find((it) => it.productId === id);
+    const item = this.data.items[idx];
     if (!item) return;
     const q = Math.max(1, Math.min(99, item.quantity + delta));
-    cart.updateQuantity(id, q);
-    const items = this.data.items.map((it) => it.productId === id ? { ...it, quantity: q } : it);
+    cart.updateQuantity(item.productId, q, item.spec);
+    const items = this.data.items.map((it, i) => (i === idx ? { ...it, quantity: q } : it));
     this.setData({ items });
     this.recalc();
   },
 
   onRemove(e) {
-    const id = e.currentTarget.dataset.id;
-    cart.remove(id);
+    const idx = Number(e.currentTarget.dataset.idx);
+    const item = this.data.items[idx];
+    if (!item) return;
+    cart.remove(item.productId, item.spec);
     this.refresh();
   },
 
@@ -102,12 +105,16 @@ Page({
   },
 
   checkout() {
-    const ids = this.data.items.filter((it) => it.checked).map((it) => it.productId);
-    if (!ids.length) {
+    const rows = this.data.items
+      .filter((it) => it.checked)
+      .map((it) => ({ productId: it.productId, spec: it.spec || '' }));
+    if (!rows.length) {
       wx.showToast({ title: '请先勾选商品', icon: 'none' });
       return;
     }
-    wx.navigateTo({ url: '/pages/checkout/checkout?mode=cart&ids=' + ids.join(',') });
+    wx.navigateTo({
+      url: '/pages/checkout/checkout?mode=cart&rows=' + encodeURIComponent(JSON.stringify(rows))
+    });
   },
 
   goHome() {

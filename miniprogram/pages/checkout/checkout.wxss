@@ -108,3 +108,9 @@
 .foot-submit {
   width: 280rpx;
 }
+
+.row-spec {
+  color: var(--color-text-secondary);
+  font-size: var(--font-caption);
+  font-weight: normal;
+}

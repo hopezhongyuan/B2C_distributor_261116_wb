@@ -1,5 +1,5 @@
 // 购物车本地存储封装（仅实物商品；决策记录 #12：SKU 少量场景本地车，不做服务端车）
-// 结构：[{ productId, quantity, addedAt }]，数量 1–99
+// 结构：[{ productId, spec, quantity, addedAt }]；规格维度（批次B+）：同商品不同规格分行
 const KEY = 'cart';
 
 function load() {
@@ -11,23 +11,27 @@ function save(list) {
   wx.setStorageSync(KEY, list.slice(0, 50));
 }
 
-/** 加入购物车；已存在则数量累加（上限 99）。virtual 不允许加入 */
-function add(productId, quantity) {
+function sameRow(it, productId, spec) {
+  return it.productId === productId && (it.spec || '') === (spec || '');
+}
+
+/** 加入购物车（同商品同规格数量累加，上限 99）。virtual 不允许加入 */
+function add(productId, quantity, spec = '') {
   const list = load();
-  const item = list.find((it) => it.productId === productId);
+  const item = list.find((it) => sameRow(it, productId, spec));
   if (item) {
     item.quantity = Math.min(99, item.quantity + quantity);
   } else {
-    list.unshift({ productId, quantity, addedAt: Date.now() });
+    list.unshift({ productId, spec: spec || '', quantity, addedAt: Date.now() });
   }
   save(list);
   return list;
 }
 
 /** 更新数量（1–99）；数量非法不生效 */
-function updateQuantity(productId, quantity) {
+function updateQuantity(productId, quantity, spec = '') {
   const list = load();
-  const item = list.find((it) => it.productId === productId);
+  const item = list.find((it) => sameRow(it, productId, spec));
   if (item && Number.isInteger(quantity) && quantity >= 1 && quantity <= 99) {
     item.quantity = quantity;
     save(list);
@@ -35,16 +39,17 @@ function updateQuantity(productId, quantity) {
   return list;
 }
 
-function remove(productId) {
-  const list = load().filter((it) => it.productId !== productId);
+function remove(productId, spec = '') {
+  const list = load().filter((it) => !sameRow(it, productId, spec));
   save(list);
   return list;
 }
 
-/** 结算后移除指定商品 */
-function removeMany(productIds) {
-  const set = new Set(productIds);
-  const list = load().filter((it) => !set.has(it.productId));
+/** 结算后移除指定「商品+规格」行：rows 为 [{productId, spec}] */
+function removeMany(rows) {
+  const keyOf = (r) => `${r.productId}|${r.spec || ''}`;
+  const set = new Set(rows.map(keyOf));
+  const list = load().filter((it) => !set.has(keyOf(it)));
   save(list);
   return list;
 }

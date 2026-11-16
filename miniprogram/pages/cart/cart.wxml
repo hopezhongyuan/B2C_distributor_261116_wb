@@ -6,10 +6,11 @@
 <block wx:elif="{{items.length > 0}}">
   <view class="cart-list">
     <view class="cart-item {{item.invalid || item.oversold ? 'item-disabled' : ''}}" wx:for="{{items}}" wx:key="productId">
-      <view class="check {{item.checked ? 'checked' : ''}}" bindtap="toggleItem" data-id="{{item.productId}}">✓</view>
+      <view class="check {{item.checked ? 'checked' : ''}}" bindtap="toggleItem" data-idx="{{index}}">✓</view>
       <image class="cover" src="{{item.cover}}" mode="aspectFill" bindtap="goDetail" data-id="{{item.productId}}" />
       <view class="info">
         <view class="title" bindtap="goDetail" data-id="{{item.productId}}">{{item.title}}</view>
+        <view wx:if="{{item.spec}}" class="spec-chip">{{item.spec}}</view>
         <view wx:if="{{item.invalid}}" class="warn">已下架</view>
         <view wx:elif="{{item.oversold}}" class="warn">库存不足（仅剩 {{item.stock}} 件）</view>
         <view class="foot">
@@ -19,13 +20,13 @@
             <text class="price-unit">.{{item.price.dec}}</text>
           </view>
           <view class="qty">
-            <view class="qty-btn" bindtap="onQty" data-id="{{item.productId}}" data-type="dec">−</view>
+            <view class="qty-btn" bindtap="onQty" data-idx="{{index}}" data-type="dec">−</view>
             <view class="qty-num">{{item.quantity}}</view>
-            <view class="qty-btn" bindtap="onQty" data-id="{{item.productId}}" data-type="inc">＋</view>
+            <view class="qty-btn" bindtap="onQty" data-idx="{{index}}" data-type="inc">＋</view>
           </view>
         </view>
       </view>
-      <view class="del" bindtap="onRemove" data-id="{{item.productId}}">删除</view>
+      <view class="del" bindtap="onRemove" data-idx="{{index}}">删除</view>
     </view>
   </view>
 

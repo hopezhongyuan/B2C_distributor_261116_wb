@@ -23,16 +23,17 @@ Page({
     // 轻量地址（PRD 简化：不做地址簿，记住上次收货信息自动回填）
     const last = wx.getStorageSync(LAST_RECEIVER_KEY);
     if (last && last.name) this.setData({ receiver: { ...this.data.receiver, ...last } });
-    if (options.mode === 'cart' && options.ids) {
-      this.loadCartItems(String(options.ids));
+    if (options.mode === 'cart' && options.rows) {
+      this.loadCartRows(options.rows);
     } else {
       const productId = parseInt(options.productId, 10);
       const quantity = Math.max(1, Math.min(99, parseInt(options.quantity, 10) || 1));
+      const spec = options.spec ? decodeURIComponent(options.spec) : '';
       productService
         .getProductDetail(productId)
         .then((p) => {
           const items = [{
-            id: p.id, title: p.title, quantity, stock: p.stock,
+            id: p.id, title: p.title, quantity, stock: p.stock, spec,
             cover: toImageUrl((p.images && p.images[0]) || p.coverImage || ''),
             price: fenToParts(p.priceCents), type: p.type
           }];
@@ -43,17 +44,27 @@ Page({
     }
   },
 
-  loadCartItems(ids) {
+  // 购物车批量结算：rows = [{productId, spec}]（批次B+ 规格维度）
+  loadCartRows(rowsJson) {
+    let rows = [];
+    try {
+      rows = JSON.parse(decodeURIComponent(rowsJson));
+    } catch (e) {
+      return this.failBack('结算参数错误');
+    }
+    rows = (Array.isArray(rows) ? rows : []).filter((r) => Number.isInteger(r.productId));
+    if (!rows.length) return this.failBack('结算参数错误');
     productService
-      .listProducts({ ids })
+      .listProducts({ ids: [...new Set(rows.map((r) => r.productId))].join(',') })
       .then((data) => {
-        const wanted = ids.split(',').map((s) => parseInt(s, 10));
         const pmap = new Map((data.list || []).map((p) => [p.id, p]));
-        const stored = new Map(cart.load().map((it) => [it.productId, it.quantity]));
-        const items = wanted.map((id) => {
-          const p = pmap.get(id);
+        const stored = new Map(cart.load().map((it) => [`${it.productId}|${it.spec || ''}`, it.quantity]));
+        const items = rows.map((r) => {
+          const p = pmap.get(r.productId);
           return {
-            id, quantity: stored.get(id) || 1, stock: p ? p.stock : 0,
+            id: r.productId, spec: r.spec || '',
+            quantity: stored.get(`${r.productId}|${r.spec || ''}`) || 1,
+            stock: p ? p.stock : 0,
             title: p ? p.title : '商品已下架',
             cover: p ? toImageUrl(p.coverImage) : '',
             price: p ? fenToParts(p.priceCents) : { yuan: '-', dec: '-' },
@@ -106,7 +117,7 @@ Page({
     }
     const { items, receiver, mode, isVirtual } = this.data;
     this.setData({ submitting: true });
-    const orderItems = items.map((it) => ({ productId: it.id, quantity: it.quantity }));
+    const orderItems = items.map((it) => ({ productId: it.id, quantity: it.quantity, spec: it.spec || '' }));
     orderService
       .createOrder({ items: orderItems, receiverInfo: isVirtual ? undefined : receiver })
       .then((order) => {
@@ -115,7 +126,7 @@ Page({
         return orderService.payOrder(order.orderId);
       })
       .then(() => {
-        if (mode === 'cart') cart.removeMany(items.map((it) => it.id));
+        if (mode === 'cart') cart.removeMany(items.map((it) => ({ productId: it.id, spec: it.spec })));
         wx.redirectTo({ url: '/pages/pay-result/pay-result?orderId=' + this.data.submittingOrderId + '&status=success' });
       })
       .catch((e) => {

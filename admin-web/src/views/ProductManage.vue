@@ -40,6 +40,7 @@
         <t-form-item label="一级比例%"><t-input v-model="form.rateL1" placeholder="如 10 表示 10%" /></t-form-item>
         <t-form-item label="二级比例%"><t-input v-model="form.rateL2" placeholder="如 5 表示 5%" /></t-form-item>
         <t-form-item label="封面路径"><t-input v-model="form.coverImage" placeholder="/uploads/products/xx.png" /></t-form-item>
+        <t-form-item label="规格"><t-input v-model="form.specsText" placeholder="逗号分隔，如：黑色,白色（留空=无规格）" /></t-form-item>
         <t-form-item label="详情"><t-textarea v-model="form.detail" :autosize="{ minRows: 3 }" /></t-form-item>
       </t-form>
     </t-dialog>
@@ -99,6 +100,7 @@ function openForm(row) {
     rateL1: row ? String(row.commissionRateL1Bp / 100) : '',
     rateL2: row ? String(row.commissionRateL2Bp / 100) : '',
     coverImage: row ? row.coverImage : '',
+    specsText: row && Array.isArray(row.specs) ? row.specs.join(',') : '',
     detail: row ? row.detail || '' : ''
   });
   formVisible.value = true;
@@ -113,6 +115,7 @@ async function save() {
     rateL1Bp: Math.round(parseFloat(form.rateL1 || '0') * 100),
     rateL2Bp: Math.round(parseFloat(form.rateL2 || '0') * 100),
     coverImage: form.coverImage,
+    specs: form.specsText.split(/[,，]/).map((s) => s.trim()).filter(Boolean),
     detail: form.detail
   };
   if (!payload.title || !Number.isInteger(payload.priceCents) || payload.priceCents <= 0) {

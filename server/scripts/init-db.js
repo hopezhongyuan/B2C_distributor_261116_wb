@@ -161,12 +161,22 @@ CREATE TABLE IF NOT EXISTS refunds (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
 
-// 既有表补列（幂等：information_schema 判断）——users.debt_cents 退款追偿欠款
+// 既有表补列（幂等：information_schema 判断）——users.debt_cents 退款追偿欠款；规格选择（批次B+）
 const MIGRATIONS = [
   [
     'users',
     'debt_cents',
     'ALTER TABLE users ADD COLUMN debt_cents BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT \'退款追偿欠款(分)\''
+  ],
+  [
+    'products',
+    'specs',
+    'ALTER TABLE products ADD COLUMN specs JSON NULL COMMENT \'规格标签列表\' AFTER detail'
+  ],
+  [
+    'order_items',
+    'spec',
+    'ALTER TABLE order_items ADD COLUMN spec VARCHAR(64) NOT NULL DEFAULT \'\' COMMENT \'规格快照\' AFTER title'
   ]
 ];
 

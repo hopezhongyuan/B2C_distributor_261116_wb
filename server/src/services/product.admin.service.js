@@ -5,6 +5,15 @@ const ERRORS = require('../config/errors');
 
 const BP_MAX = 5000;
 
+/** 规格校验（纯函数）：≤20 个，每个 1–32 字符去重去空 */
+function validateSpecs(raw) {
+  if (!Array.isArray(raw)) throw { code: ERRORS.PARAM_INVALID, msg: 'specs 须为字符串数组' };
+  const cleaned = [...new Set(raw.map((s) => String(s).trim()).filter(Boolean))];
+  if (cleaned.length > 20) throw { code: ERRORS.PARAM_INVALID, msg: 'specs 最多 20 个' };
+  if (cleaned.some((s) => s.length > 32)) throw { code: ERRORS.PARAM_INVALID, msg: '规格名 ≤32 字符' };
+  return cleaned;
+}
+
 /** 创建/编辑公共校验（纯函数，供单测）；返回规范化字段或抛 1001 */
 function validatePayload(data, { partial = false } = {}) {
   const out = {};
@@ -38,6 +47,9 @@ function validatePayload(data, { partial = false } = {}) {
   if (data.images !== undefined) {
     if (!Array.isArray(data.images) || data.images.length > 9) throw { code: ERRORS.PARAM_INVALID, msg: 'images 最多 9 张' };
     out.images = data.images;
+  }
+  if (data.specs !== undefined) {
+    out.specs = validateSpecs(data.specs);
   }
   for (const k of ['coverImage', 'detail', 'virtualConfig']) {
     if (data[k] !== undefined) out[k] = data[k];
@@ -86,4 +98,4 @@ async function update(id, data) {
   return p;
 }
 
-module.exports = { validatePayload, list, create, update, setStatus, BP_MAX };
+module.exports = { validatePayload, validateSpecs, list, create, update, setStatus, BP_MAX };

@@ -63,3 +63,12 @@ test('佣金管理：状态白名单 + 查询条件组合（M4 尾项）', () =>
   assert.strictEqual(both.status, 'PAID');
   assert.ok(Array.isArray(both[Op.or]));
 });
+
+test('validateSpecs：去空去重截断，非法输入抛码 1001', () => {
+  const { validateSpecs } = require('../src/services/product.admin.service');
+  assert.deepStrictEqual(validateSpecs(['黑色', ' 白色 ', '', '黑色']), ['黑色', '白色']);
+  assert.deepStrictEqual(validateSpecs([]), []);
+  assert.throws(() => validateSpecs('黑色'), (e) => e.code === 1001);
+  assert.throws(() => validateSpecs(Array.from({ length: 21 }, (_, i) => 's' + i)), (e) => e.code === 1001);
+  assert.throws(() => validateSpecs(['x'.repeat(33)]), (e) => e.code === 1001);
+});

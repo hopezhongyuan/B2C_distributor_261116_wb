@@ -18,6 +18,8 @@ module.exports = (sequelize) =>
       images: { type: DataTypes.JSON, defaultValue: [] },
       coverImage: { type: DataTypes.STRING(256), defaultValue: '' },
       detail: { type: DataTypes.TEXT },
+      // 规格标签列表（单维度轻量 SKU）：如 ["黑色","白色"]；空=无规格；价格/库存共用商品级
+      specs: { type: DataTypes.JSON, defaultValue: [] },
       // 虚拟服务核销配置
       virtualConfig: { type: DataTypes.JSON, allowNull: true }
     },

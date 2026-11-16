@@ -168,3 +168,13 @@
   color: #fff;
   font-size: var(--font-caption);
 }
+
+.spec-chip {
+  display: inline-block;
+  margin-top: 8rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 6rpx;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-caption);
+}

@@ -4,7 +4,7 @@
   <view class="card row" wx:for="{{items}}" wx:key="id">
     <image class="row-cover" src="{{item.cover}}" mode="aspectFill" />
     <view class="row-info">
-      <view class="row-title">{{item.title}}</view>
+      <view class="row-title">{{item.title}}<text wx:if="{{item.spec}}" class="row-spec">（{{item.spec}}）</text></view>
       <view class="row-bottom">
         <view class="price-wrap">
           <text class="price-unit">¥</text>

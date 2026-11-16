@@ -17,6 +17,18 @@
     <view class="sub text-secondary">
       {{product.type === 'virtual' ? '虚拟服务，核销后不可退' : '库存 ' + product.stock + ' 件 · 7 天无理由退货'}}
     </view>
+    <view wx:if="{{product.specs.length}}" class="spec-row">
+      <view class="spec-label">规格</view>
+      <view class="spec-tags">
+        <view
+          wx:for="{{product.specs}}"
+          wx:key="*this"
+          class="spec-tag {{specIndex === index ? 'active' : ''}}"
+          bindtap="selectSpec"
+          data-idx="{{index}}"
+        >{{item}}</view>
+      </view>
+    </view>
   </view>
 
   <view class="card">

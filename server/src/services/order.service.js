@@ -34,6 +34,13 @@ async function createOrder(userId, { items, receiverInfo, clientOrderId }) {
     if (p.type === 'virtual' && items.length > 1) {
       throw { code: ERRORS.PARAM_INVALID, msg: '虚拟服务需单独下单' };
     }
+    // 规格校验（批次B+）：商品配置了 specs 时 spec 必填且必须在列表内
+    const specs = Array.isArray(p.specs) ? p.specs : [];
+    const spec = typeof it.spec === 'string' ? it.spec.trim().slice(0, 64) : '';
+    if (specs.length > 0 && !specs.includes(spec)) {
+      throw { code: ERRORS.PARAM_INVALID, msg: `「${p.title}」请选择有效规格` };
+    }
+    it._spec = specs.length > 0 ? spec : '';
     totalCents += p.priceCents * it.quantity;
   }
   const type = pmap.get(Number(items[0].productId)).type;
@@ -65,7 +72,7 @@ async function createOrder(userId, { items, receiverInfo, clientOrderId }) {
       const p = pmap.get(Number(it.productId));
       await OrderItem.create(
         {
-          orderId: order.id, productId: p.id, title: p.title,
+          orderId: order.id, productId: p.id, title: p.title, spec: it._spec || '',
           priceCents: p.priceCents, quantity: it.quantity,
           amountCents: p.priceCents * it.quantity,
           rateL1Bp: p.commissionRateL1Bp, rateL2Bp: p.commissionRateL2Bp

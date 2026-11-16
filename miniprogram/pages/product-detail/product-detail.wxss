@@ -116,3 +116,36 @@
   flex: 1;
   margin-left: var(--space-md);
 }
+
+.spec-row {
+  display: flex;
+  margin-top: 16rpx;
+}
+
+.spec-label {
+  width: 90rpx;
+  font-size: var(--font-body);
+  color: var(--color-text-secondary);
+  padding-top: 8rpx;
+}
+
+.spec-tags {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+
+.spec-tag {
+  padding: 8rpx 28rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid var(--color-border);
+  font-size: var(--font-caption);
+  color: var(--color-text);
+}
+
+.spec-tag.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(46, 107, 230, 0.06);
+}

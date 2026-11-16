@@ -42,6 +42,8 @@ const OrderItem = (sequelize) =>
       productId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
       // 快照字段
       title: { type: DataTypes.STRING(128), allowNull: false },
+      // 规格快照（''=无规格），如 "黑色"
+      spec: { type: DataTypes.STRING(64), defaultValue: '' },
       priceCents: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
       quantity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
       amountCents: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },

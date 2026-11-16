@@ -10,7 +10,7 @@
         </t-form-item>
         <t-button type="submit" block :loading="loading">登录</t-button>
       </t-form>
-      <p class="tip">M4 上线管理员接口后可登录，当前为骨架预览</p>
+      <p class="tip">管理员账号由服务器脚本创建：node scripts/create-admin.js</p>
     </t-card>
   </div>
 </template>

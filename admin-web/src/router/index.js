@@ -9,12 +9,12 @@ const routes = [
     component: () => import('../views/AdminLayout.vue'),
     redirect: '/products',
     children: [
-      { path: 'products', name: 'products', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '商品管理', module: 'product' } },
-      { path: 'orders', name: 'orders', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '订单管理', module: 'order' } },
-      { path: 'distribution', name: 'distribution', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '分销管理', module: 'distribution' } },
+      { path: 'products', name: 'products', component: () => import('../views/ProductManage.vue'), meta: { title: '商品管理', module: 'product' } },
+      { path: 'orders', name: 'orders', component: () => import('../views/OrderManage.vue'), meta: { title: '订单管理', module: 'order' } },
+      { path: 'distribution', name: 'distribution', component: () => import('../views/DistributorManage.vue'), meta: { title: '分销管理', module: 'distribution' } },
       { path: 'commissions', name: 'commissions', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '佣金管理', module: 'commission' } },
-      { path: 'withdrawals', name: 'withdrawals', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '提现审核', module: 'withdraw' } },
-      { path: 'configs', name: 'configs', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '参数配置', module: 'config' } },
+      { path: 'withdrawals', name: 'withdrawals', component: () => import('../views/WithdrawAudit.vue'), meta: { title: '提现审核', module: 'withdraw' } },
+      { path: 'configs', name: 'configs', component: () => import('../views/ConfigManage.vue'), meta: { title: '参数配置', module: 'config' } },
       { path: 'dashboard', name: 'dashboard', component: () => import('../views/ModulePlaceholder.vue'), meta: { title: '数据看板', module: 'dashboard' } }
     ]
   }

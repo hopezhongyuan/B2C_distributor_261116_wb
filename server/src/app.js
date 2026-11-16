@@ -8,7 +8,8 @@ const { startJobs } = require('./jobs');
 
 const app = express();
 
-app.use(express.json({ limit: '1mb' }));
+// rawBody 捕获：支付回调验签需要原始报文（routes/payment 内已用 express.raw 接管）
+app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 
 // 静态资源：图片本地存储（architecture.md 存储决策），Nginx 生产环境接管
 app.use('/uploads', express.static(config.uploadDir, { maxAge: '7d' }));

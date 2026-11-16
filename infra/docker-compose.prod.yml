@@ -37,6 +37,8 @@ services:
       UPLOAD_DIR: /app/uploads
     volumes:
       - uploads:/app/uploads
+      # 微信支付商户私钥（apiclient_key.pem）放宿主机 infra/certs/，只读挂载，不入镜像不入库
+      - ./certs:/app/certs:ro
     # 绑定 docker 网关 IP：宿主 Caddy 以 172.19.0.1:3020 反代（与 test1 模式一致）
     ports:
       - "172.19.0.1:3020:3000"

@@ -134,4 +134,31 @@ async function redeem(orderId) {
   }
 }
 
-module.exports = { createOrder, listOrders, assertOwner, confirmReceipt, redeem, PAY_EXPIRE_MINUTES };
+// 支付回调落账：PENDING_PAY → PAID + 生成 FROZEN 佣金（佣金生成时点 = 支付成功，architecture §4.2）
+// 幂等：同一订单重复回调直接返回已落账结果；金额不一致视为异常拒绝
+async function markPaid(orderNo, transactionId, paidCents) {
+  const t = await sequelize.transaction();
+  try {
+    const order = await Order.findOne({
+      where: { orderNo },
+      include: [{ model: OrderItem, as: 'OrderItems' }], transaction: t, lock: t.LOCK.UPDATE
+    });
+    if (!order) throw { code: ERRORS.ORDER_NOT_FOUND, msg: '订单不存在' };
+    if (paidCents !== null && paidCents !== undefined && paidCents !== order.payableCents) {
+      throw { code: ERRORS.WX_API_ERROR, msg: '回调金额与订单不一致' };
+    }
+    if (order.status !== 'PENDING_PAY') {
+      await t.commit();
+      return order; // 幂等：已支付/已关闭的重复回调不重复落账
+    }
+    await order.update({ status: 'PAID', payTime: new Date(), transactionId }, { transaction: t });
+    await commissionService.generateForOrder(order, order.OrderItems, order.userId, 'frozen', t);
+    await t.commit();
+    return order;
+  } catch (e) {
+    await t.rollback();
+    throw e;
+  }
+}
+
+module.exports = { createOrder, listOrders, assertOwner, confirmReceipt, redeem, markPaid, PAY_EXPIRE_MINUTES };

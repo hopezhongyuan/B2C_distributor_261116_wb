@@ -32,7 +32,9 @@ async function pay(req, res) {
   if (Date.now() - order.createdAt.getTime() > orderService.PAY_EXPIRE_MINUTES * 60000) {
     return fail(res, ERRORS.ORDER_STATE_INVALID, '订单已超时，请重新下单');
   }
-  const params = await wxpayService.createJsapiOrder(order);
+  const { User } = require('../models');
+  const user = await User.findByPk(req.user.uid, { attributes: ['openid'] });
+  const params = await wxpayService.createJsapiOrder(order, user ? user.openid : '');
   return ok(res, params);
 }
 

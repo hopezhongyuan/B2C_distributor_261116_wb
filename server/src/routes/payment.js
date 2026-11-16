@@ -1,15 +1,25 @@
-// payment 路由 — 微信支付回调入口（契约：docs/api/order.md notify）
-// 完整验签+落账在支付商户配置就绪后接入；当前拒绝一切请求（微信会重试）
+// payment 路由 — 微信支付回调（契约：docs/api/order.md notify）
+// 验签（平台证书）→ AES-GCM 解密 → 幂等落账（PAID + FROZEN 佣金）
+// 应答格式遵循微信规范：成功 {"code":"SUCCESS"}；失败返回 5xx 触发微信重试
 const express = require('express');
-const { fail } = require('../middlewares/errorHandler');
-const ERRORS = require('../config/errors');
+const wxpayService = require('../services/wxpay.service');
+const orderService = require('../services/order.service');
 
 const router = express.Router();
 
-router.post('/notify', (req, res) => {
-  // TODO(M1 支付联调)：API v3 验签 → 解密 → transaction_id 幂等 → 订单 PAID →
-  // 佣金生成（commission.service.generateForOrder mode='frozen'）→ 返回 200
-  return fail(res, ERRORS.WX_API_ERROR, '支付回调尚未启用', 503);
+router.post('/notify', express.raw({ type: '*/*', limit: '256kb' }), async (req, res) => {
+  // 全局 express.json 已先解析时用 verify 回调捕获的原始 Buffer，否则用 express.raw 结果
+  const raw = Buffer.isBuffer(req.body) ? req.body : req.rawBody;
+  const rawBody = raw ? raw.toString('utf8') : String(req.body || '');
+  try {
+    const { orderNo, transactionId, paidCents } = await wxpayService.handleNotify(req.headers, rawBody);
+    await orderService.markPaid(orderNo, transactionId, paidCents);
+    return res.status(200).json({ code: 'SUCCESS', message: '成功' });
+  } catch (e) {
+    // 任何失败（验签/解密/落账）都返回失败，让微信按策略重试；对账 job 兜底
+    console.error('[payment.notify] failed:', e.msg || e.message);
+    return res.status(500).json({ code: 'FAIL', message: e.msg || '处理失败' });
+  }
 });
 
 module.exports = router;

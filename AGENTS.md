@@ -26,7 +26,7 @@
 | 1 需求分析 | 产品需求文档（含决策记录） | `docs/PRD-*.md` | ✅ v0.3 已确认 |
 | 2 产品设计 | 业务流程图 / 页面原型 | `docs/design/` | ✅ M2.1 定稿（distribution-flow.md 分销链路） |
 | 3 架构设计 | 数据模型 / 状态机 / 技术决策 | `docs/architecture.md` | ✅ v0.2（佣金状态机 M2.1 复审定稿） |
-| 3 架构设计 | 接口契约（按模块） | `docs/api/<模块>.md` | ✅ M1 三份 + M2 两份 + M3 两份定稿（auth/product/order/relation/commission/user/withdraw）；admin 随 M4 产出 |
+| 3 架构设计 | 接口契约（按模块） | `docs/api/<模块>.md` | ✅ 8 份定稿（auth/product/order/relation/commission/user/withdraw/admin，M3.4 提现管理先行）；M4 仅剩管理模块扩展 |
 | 4 UI 设计 | 设计规范 / 视觉稿 | `docs/ui/design-tokens.md` | ✅ v1.0 设计 token 已定稿 |
 | 5 开发实现 | 编码规范 / 目录约定 / 契约先行 | 本文件 §5–§6 | ✅ 已定义 |
 | 6 测试验收 | 分级测试要求 / 边界规则表 | 本文件 §7 + `tests/` | ✅ 已定义，用例随码 |

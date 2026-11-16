@@ -34,8 +34,9 @@ Page({
         this.setData({ products, loading: false });
       })
       .catch((e) => {
-        // 错误带上下文（msg + code），避免吞掉真实原因
-        const detail = (e && e.msg) || (e && e.errMsg) || '加载失败';
+        // 诊断：完整打印错误对象，界面显示具体原因（msg/errMsg/message + code）
+        console.error('[home] fetchList failed:', e);
+        const detail = (e && e.msg) || (e && e.errMsg) || (e && e.message) || '加载失败';
         const code = e && e.code ? '(' + e.code + ')' : '';
         this.setData({ loading: false, error: detail + code });
       })

@@ -34,6 +34,11 @@ services:
       JWT_EXPIRES_IN: 7d
       WX_APPID: ${WX_APPID}
       WX_SECRET: ${WX_SECRET}
+      WXPAY_MCHID: ${WXPAY_MCHID}
+      WXPAY_SERIAL: ${WXPAY_SERIAL}
+      WXPAY_APIV3_KEY: ${WXPAY_APIV3_KEY}
+      WXPAY_PRIVATE_KEY_PATH: ${WXPAY_PRIVATE_KEY_PATH}
+      WXPAY_NOTIFY_URL: ${WXPAY_NOTIFY_URL}
       UPLOAD_DIR: /app/uploads
     volumes:
       - uploads:/app/uploads

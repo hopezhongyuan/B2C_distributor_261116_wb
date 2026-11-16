@@ -19,7 +19,7 @@
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | availableCents | number | 可提现余额（分，= commissions AVAILABLE 之和） |
-| minWithdrawCents | number | 起提金额（分，configs `min_withdraw_cents`） |
+| minWithdrawCents | number | 起提金额（分，configs `withdraw_min_cents`） |
 | pendingCount | number | 在途申请数（pending + approved 未打款），≥1 时禁止再次申请 |
 | realNameMasked | string\|null | 已实名则返回脱敏姓名（如「张*三」），未实名 null |
 
@@ -43,7 +43,7 @@
 |---|---|---|
 | withdrawNo | string | 提现单号（唯一，打款幂等键） |
 | amountCents | number | 申请金额 |
-| status | string | 固定 `PENDING` |
+| status | string | 固定 `pending`（提现状态枚举为小写，与 DB ENUM 一致：pending/approved/rejected/paid/failed） |
 
 **错误码**
 
@@ -67,7 +67,7 @@
 |---|---|---|
 | withdrawNo | string | 单号 |
 | amountCents | number | 金额（分） |
-| status | string | PENDING/APPROVED/REJECTED/PAID/FAILED |
+| status | string | pending/approved/rejected/paid/failed（小写，与 DB ENUM 一致） |
 | rejectReason | string\|null | 驳回原因 |
 | createdAt | string | 申请时间 |
 

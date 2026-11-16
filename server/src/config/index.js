@@ -26,6 +26,13 @@ module.exports = {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d'
   },
 
+  security: {
+    // 实名加密密钥：32 字节 base64；生产必填，开发缺省用固定测试密钥（禁止用于生产数据）
+    idcardAesKey:
+      process.env.IDCARD_AES_KEY ||
+      (process.env.NODE_ENV === 'production' ? '' : 'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY')
+  },
+
   wx: {
     appid: process.env.WX_APPID || '',
     // M0 部署时允许为空（auth 模块 M1 接入），生产缺失时仅告警

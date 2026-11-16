@@ -34,6 +34,7 @@ db.COMMISSION_STATUS = COMMISSION_STATUS;
 const { Config, IdempotencyKey } = require('./configs');
 db.Config = Config(sequelize);
 db.IdempotencyKey = IdempotencyKey(sequelize);
+db.Withdrawal = require('./withdrawals')(sequelize);
 
 // 关联
 db.User.hasMany(db.Order, { foreignKey: 'user_id' });

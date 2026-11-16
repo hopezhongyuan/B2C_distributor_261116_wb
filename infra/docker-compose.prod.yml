@@ -31,6 +31,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      IDCARD_AES_KEY: ${IDCARD_AES_KEY}
       JWT_EXPIRES_IN: 7d
       WX_APPID: ${WX_APPID}
       WX_SECRET: ${WX_SECRET}

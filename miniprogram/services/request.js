@@ -27,20 +27,22 @@ function rawRequest(options) {
       url: config.API_BASE_URL + options.url,
       method: options.method || 'GET',
       data: options.data || {},
+      timeout: 15000,
       header: {
         'content-type': 'application/json',
         Authorization: 'Bearer ' + getToken()
       },
       success: resolve,
-      fail: () => reject({ code: ERRORS.SYSTEM_ERROR, msg: '网络异常，请稍后再试' })
+      fail: (e) => reject({ code: ERRORS.SYSTEM_ERROR, msg: '网络异常，请稍后再试', errMsg: e && e.errMsg })
     });
   });
 }
 
 /**
  * 业务请求：resolve(data) 或 reject({code, msg})
+ * 1002（登录态失效）时自动静默重登并重放一次；再失败才抛给页面
  */
-function request(options) {
+function request(options, _retried) {
   return rawRequest(options).then((res) => {
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw { code: ERRORS.SYSTEM_ERROR, msg: '网络异常(' + res.statusCode + ')' };
@@ -52,6 +54,11 @@ function request(options) {
     if (body.code === ERRORS.UNAUTHORIZED) {
       setToken('');
       setUserId('');
+      if (!_retried) {
+        return ensureLogin()
+          .then(() => request(options, true))
+          .catch(() => { throw { code: ERRORS.UNAUTHORIZED, msg: '登录失效，请重试' }; });
+      }
     }
     throw { code: body.code, msg: body.msg || '请求失败' };
   });

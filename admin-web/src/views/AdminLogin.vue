@@ -37,7 +37,9 @@ async function onSubmit({ validateResult }) {
     // 对应 docs/api/admin.md 契约（M4 实现）：POST /api/admin/login
     const data = await http.post('/admin/login', formData);
     setToken(data.token);
-    router.push('/');
+    // 登录过期被踢出时回跳原页面（query.redirect 由 request.js 写入）
+    const redirect = router.currentRoute.value.query.redirect;
+    router.push(typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/');
   } catch (e) {
     MessagePlugin.error(e.msg || '登录失败');
   } finally {

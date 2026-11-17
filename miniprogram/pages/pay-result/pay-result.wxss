@@ -61,3 +61,7 @@
   border: none;
   color: var(--color-text-secondary);
 }
+
+.error-text {
+  color: #e34d59;
+}

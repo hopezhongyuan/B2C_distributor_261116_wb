@@ -57,7 +57,6 @@ Page({
 
   goDetail(e) {
     const id = e.currentTarget.dataset.id;
-    console.log('[home] goDetail id =', id);
     wx.navigateTo({
       url: '/pages/product-detail/product-detail?id=' + id,
       fail: (err) => {

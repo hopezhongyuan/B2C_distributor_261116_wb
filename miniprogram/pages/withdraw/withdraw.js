@@ -47,6 +47,7 @@ Page({
           summary: {
             availableText: fenToYuan(s.availableCents),
             minText: fenToYuan(s.minWithdrawCents),
+            minWithdrawCents: s.minWithdrawCents, // 分原始值：校验用，避免"分→元→分"往返浮点换算
             pendingCount: s.pendingCount,
             realNameMasked: s.realNameMasked
           },
@@ -96,7 +97,7 @@ Page({
     if (submitting) return;
     const amountCents = yuanToFcents(amount);
     if (!amountCents) return wx.showToast({ title: '请输入提现金额', icon: 'none' });
-    if (summary && amountCents < Number(summary.minText) * 100) {
+    if (summary && amountCents < summary.minWithdrawCents) {
       return wx.showToast({ title: `最低提现 ${summary.minText} 元`, icon: 'none' });
     }
     if (!realnamed && (!realName.trim() || !idCardNo.trim())) {

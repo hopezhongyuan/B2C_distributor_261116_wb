@@ -25,15 +25,23 @@ Page({
     noMore: false
   },
 
-  onLoad(options) {
-    // 支持首页分类导航带参进入：?type=physical|virtual（tab 场景经 storage 传递）
-    const type = (options && options.type) || wx.getStorageSync('product_list_type') || '';
-    wx.removeStorageSync('product_list_type');
-    if (type && TYPES.some((t) => t.key === type)) this.data.activeType = type;
+  onLoad() {
     this.fetch(true);
   },
 
+  // 首页分类导航经 storage 传参（tab 页 onLoad 只触发一次，须在 onShow 消费才能支持二次导航）
+  onShow() {
+    const type = wx.getStorageSync('product_list_type');
+    if (!type) return;
+    wx.removeStorageSync('product_list_type');
+    if (TYPES.some((t) => t.key === type) && type !== this.data.activeType) {
+      this.setData({ activeType: type, list: [], page: 1, noMore: false });
+      this.fetch(true);
+    }
+  },
+
   onPullDownRefresh() {
+    if (this.data.loading) return; // 防与在途触底加载并发拼接出重复数据
     this.fetch(true, () => wx.stopPullDownRefresh());
   },
 

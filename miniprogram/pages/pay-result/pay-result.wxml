@@ -3,7 +3,9 @@
   <view class="result-title">{{view.title}}</view>
   <view class="result-desc">{{view.desc}}</view>
   <view wx:if="{{payableText}}" class="result-amount">{{payableText}}</view>
+  <view wx:if="{{loadError}}" class="result-desc error-text">查询失败，请检查网络后重试</view>
 
+  <view wx:if="{{loadError || isPending}}" class="btn-plain" bindtap="recheck">{{checking ? '查询中…' : '重新查询'}}</view>
   <view wx:if="{{canRepay}}" class="btn-primary {{paying ? 'disabled' : ''}}" bindtap="repay">继续支付</view>
   <view class="btn-plain" bindtap="goOrder">查看订单</view>
   <view class="btn-plain subtle" bindtap="goHome">返回首页</view>

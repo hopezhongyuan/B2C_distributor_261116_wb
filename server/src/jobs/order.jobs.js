@@ -4,6 +4,7 @@
 const cron = require('node-cron');
 const { Op } = require('sequelize');
 const config = require('../config');
+const { Order } = require('../models');
 const orderService = require('../services/order.service');
 const refundAdmin = require('../services/refund.admin.service');
 const wxpay = require('../services/wxpay.core');

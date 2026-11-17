@@ -172,7 +172,7 @@ async function markPaid(orderNo, transactionId, paidCents) {
 }
 
 /** 关闭单笔待支付订单（事务+行锁重查防回调并发，归还库存）；超时关单与管理员关单共用 */
-async function closePendingOrder(orderId, reason) {
+async function closePendingOrder(orderId) {
   const t = await sequelize.transaction();
   try {
     const fresh = await Order.findOne({

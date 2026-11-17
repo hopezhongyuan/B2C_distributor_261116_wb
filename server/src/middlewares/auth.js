@@ -31,8 +31,8 @@ function signUserToken(uid) {
 }
 
 // —— 管理端 ——
-function signAdminToken(aid, role) {
-  return jwt.sign({ aid, role, scope: 'admin' }, config.jwt.secret, { expiresIn: '12h' });
+function signAdminToken(aid, role, username) {
+  return jwt.sign({ aid, role, username: username || '', scope: 'admin' }, config.jwt.secret, { expiresIn: '12h' });
 }
 
 function requireAdmin(req, res, next) {
@@ -42,7 +42,7 @@ function requireAdmin(req, res, next) {
   try {
     const payload = jwt.verify(token, config.jwt.secret);
     if (payload.scope !== 'admin' || !Number.isInteger(payload.aid)) throw new Error('scope');
-    req.admin = { aid: payload.aid, role: payload.role };
+    req.admin = { aid: payload.aid, role: payload.role, username: payload.username || '' };
     return next();
   } catch (_e) {
     return res.status(200).json({ code: ERRORS.UNAUTHORIZED, msg: '登录已过期', data: null });

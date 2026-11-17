@@ -37,7 +37,22 @@ async function login(username, password) {
     throw { code: ERRORS.FORBIDDEN, msg: '用户名或密码错误' };
   }
   failMap.delete(username);
-  return { token: signAdminToken(admin.id, admin.role), username: admin.username, role: admin.role };
+  return { token: signAdminToken(admin.id, admin.role, admin.username), username: admin.username, role: admin.role };
 }
 
-module.exports = { login };
+// 操作审计查询：管理员/动作筛选 + 时间倒序分页
+async function auditLogList({ adminId, action, page = 1, pageSize = 20 }) {
+  const { AdminAuditLog } = require('../models');
+  const where = {};
+  if (adminId) where.adminId = adminId;
+  if (action) where.action = action;
+  const { rows, count } = await AdminAuditLog.findAndCountAll({
+    where,
+    order: [['id', 'DESC']],
+    offset: (page - 1) * pageSize,
+    limit: pageSize
+  });
+  return { list: rows, page, pageSize, total: count };
+}
+
+module.exports = { login, auditLogList };

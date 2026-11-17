@@ -5,7 +5,7 @@ process.env.DB_DIALECT = 'sqlite';
 process.env.DB_STORAGE = ':memory:';
 
 const {
-  sequelize, User, Product, Config, Order, Commission, Withdrawal
+  sequelize, User, Product, Config, Order, Commission, Withdrawal, AdminAuditLog
 } = require('../../src/models');
 
 const VALID_ID_NO = '11010519491231002X'; // GB11643 官方样例，校验位合法
@@ -71,7 +71,7 @@ async function approveRefund(refundId) {
 }
 
 module.exports = {
-  sequelize, User, Product, Config, Order, Commission, Withdrawal,
+  sequelize, User, Product, Config, Order, Commission, Withdrawal, AdminAuditLog,
   setupDb, createUser, createProduct, createPaidOrder, approveRefund,
   RECEIVER, VALID_ID_NO, VALID_NAME
 };

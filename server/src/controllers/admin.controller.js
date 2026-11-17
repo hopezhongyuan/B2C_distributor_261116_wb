@@ -118,11 +118,20 @@ async function configUpdate(req, res) {
   return ok(res, await configAdmin.update(String(req.params.key), (req.body || {}).value));
 }
 
+// —— 操作审计 ——
+async function auditLogList(req, res) {
+  return ok(res, await adminService.auditLogList({
+    adminId: req.query.adminId || undefined,
+    action: req.query.action || undefined,
+    ...pageArgs(req)
+  }));
+}
+
 module.exports = {
   login, withdrawList, withdrawReview, withdrawSync,
   productList, productCreate, productUpdate, productStatus,
   orderList, orderRedeem, distributorList, distributorStatus, distributorDetail, relationList,
   commissionSummary, commissionList, commissionByOrder, dashboard,
   refundList, refundAudit, refundRetry,
-  configList, configUpdate
+  configList, configUpdate, auditLogList
 };

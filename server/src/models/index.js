@@ -42,6 +42,7 @@ db.AdminUser = require('./adminUsers')(sequelize);
 const { RefundFactory, REFUND_STATUS } = require('./refunds');
 db.Refund = RefundFactory(sequelize);
 db.REFUND_STATUS = REFUND_STATUS;
+db.AdminAuditLog = require('./adminAuditLogs')(sequelize);
 
 // 关联
 db.User.hasMany(db.Order, { foreignKey: 'user_id' });

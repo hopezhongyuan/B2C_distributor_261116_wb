@@ -40,7 +40,8 @@ const menus = [
   { path: '/withdrawals', title: '提现审核' },
   { path: '/refunds', title: '退款审核' },
   { path: '/configs', title: '参数配置' },
-  { path: '/dashboard', title: '数据看板' }
+  { path: '/dashboard', title: '数据看板' },
+  { path: '/audit-logs', title: '操作日志' }
 ];
 
 const activeMenu = computed(() => route.path);

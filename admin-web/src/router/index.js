@@ -17,7 +17,8 @@ const routes = [
       { path: 'withdrawals', name: 'withdrawals', component: () => import('../views/WithdrawAudit.vue'), meta: { title: '提现审核', module: 'withdraw' } },
       { path: 'refunds', name: 'refunds', component: () => import('../views/RefundAudit.vue'), meta: { title: '退款审核', module: 'refund' } },
       { path: 'configs', name: 'configs', component: () => import('../views/ConfigManage.vue'), meta: { title: '参数配置', module: 'config' } },
-      { path: 'dashboard', name: 'dashboard', component: () => import('../views/DataDashboard.vue'), meta: { title: '数据看板', module: 'dashboard' } }
+      { path: 'dashboard', name: 'dashboard', component: () => import('../views/DataDashboard.vue'), meta: { title: '数据看板', module: 'dashboard' } },
+      { path: 'audit-logs', name: 'audit-logs', component: () => import('../views/AuditLogs.vue'), meta: { title: '操作日志', module: 'audit' } }
     ]
   }
 ];

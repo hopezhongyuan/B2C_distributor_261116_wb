@@ -159,6 +159,22 @@ CREATE TABLE IF NOT EXISTS refunds (
   KEY idx_refunds_order (order_id),
   KEY idx_refunds_user (user_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS admin_audit_logs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  admin_id BIGINT UNSIGNED NOT NULL,
+  username VARCHAR(64) NOT NULL DEFAULT '',
+  method VARCHAR(8) NOT NULL,
+  path VARCHAR(128) NOT NULL,
+  action VARCHAR(64) NOT NULL DEFAULT '',
+  target_id VARCHAR(32) NOT NULL DEFAULT '',
+  summary VARCHAR(512) NOT NULL DEFAULT '',
+  ip VARCHAR(45) NOT NULL DEFAULT '',
+  result VARCHAR(16) NOT NULL DEFAULT 'OK',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_audit_admin (admin_id, created_at),
+  KEY idx_audit_action (action, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
 
 // 既有表补列（幂等：information_schema 判断）——users.debt_cents 退款追偿欠款；规格选择（批次B+）

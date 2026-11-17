@@ -68,5 +68,10 @@ module.exports = {
     publicKeyId: process.env.WXPAY_PUBLIC_KEY_ID || ''
   },
 
+  // Redis（可选）：配置 REDIS_URL 时限流计数走 Redis（多实例部署共享窗口），缺省内存存储
+  redis: {
+    url: process.env.REDIS_URL || ''
+  },
+
   uploadDir: process.env.UPLOAD_DIR || 'uploads'
 };

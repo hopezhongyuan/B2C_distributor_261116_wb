@@ -3,12 +3,17 @@
 const router = require('express').Router();
 const ctrl = require('../controllers/admin.controller');
 const { requireAdmin, requireRole } = require('../middlewares/auth');
+const auditLogger = require('../middlewares/auditLog');
 const asyncHandler = require('../middlewares/asyncHandler');
 
 const OPS = ['super', 'ops'];
 const FIN = ['super', 'finance'];
 
 router.post('/login', asyncHandler(ctrl.login));
+
+// 操作审计：登录之后的全部写操作自动落库（含失败尝试）；查询路由在最前避免被写审计误记
+router.get('/audit-logs', requireAdmin, asyncHandler(ctrl.auditLogList));
+router.use(auditLogger);
 
 // 提现审核（M3.4）
 router.get('/withdraws', requireAdmin, asyncHandler(ctrl.withdrawList));

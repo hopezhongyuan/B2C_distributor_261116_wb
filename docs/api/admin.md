@@ -312,6 +312,12 @@ APPROVED 状态重试打款（同 refundNo 幂等）。权限同上。
 
 `GET /admin/dashboard` 新增 `distributorCount`（active 分销员数）、`inviterCount`（产生过佣金的去重受益人数）。
 
+### GET /admin/audit-logs?adminId=&action=&page=&pageSize=（操作审计）
+
+管理端写操作审计流水（refund_audit / withdraw_review / product_ops / config_update / order_redeem / distributor_ops 等），含操作人、方法+路径、目标 ID、请求体摘要（脱敏）、IP、结果（OK/HTTP 码），时间倒序。读=全部。
+
 ## 15. 仍预留（后续迭代）
 
-RBAC 细粒度权限点（模块级 `meta.roles`）、操作审计表、Redis 登录限流（当前为 express-rate-limit 内存限流，多实例部署需升级）。
+RBAC 细粒度权限点（模块级 `meta.roles`）。
+
+> 限流存储：express-rate-limit 默认内存（单实例）；配置 `REDIS_URL` 后自动切换 rate-limit-redis 共享计数窗口（多实例就绪）。

@@ -53,4 +53,5 @@ API 基址按运行版本自动切换：开发/体验版走 `miniprogram/config/
 ## 部署概要
 
 生产部署使用 `infra/docker-compose.prod.yml`（api + admin-nginx + mysql，密钥经服务器 `.env` 注入），
-Caddy 反代与证书在宿主机管理。变更契约/数据结构时按 `AGENTS.md §2.3` 传播规则同步文档。
+Caddy 反代与证书在宿主机管理。`infra/Caddyfile` 是生产 `/opt/aition-config/Caddyfile` 的版本库镜像，
+改动先入仓库再 scp 同步（流程见该文件头注释）。变更契约/数据结构时按 `AGENTS.md §2.3` 传播规则同步文档。

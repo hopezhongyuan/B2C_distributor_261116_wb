@@ -1,0 +1,38 @@
+# ============================================================================
+# 生产 Caddy 配置的版本库镜像（2026-11-17 拉取自 8.152.204.21:/opt/aition-config/Caddyfile）
+# 生效方式：宿主该文件挂载进 aition-ows-caddy 容器的 /etc/caddy/Caddyfile
+# 修改流程（先改仓库再同步，勿在服务器上手改）：
+#   scp -i ~/.ssh/car_service_deploy_v2 infra/Caddyfile root@8.152.204.21:/opt/aition-config/Caddyfile
+#   ssh root@8.152.204.21 "docker exec aition-ows-caddy caddy validate --config /etc/caddy/Caddyfile && docker exec aition-ows-caddy caddy reload --config /etc/caddy/Caddyfile"
+# ============================================================================
+
+# AitionOWS 生产反代(阿里云 8.152.204.21)
+# 注意:生产路径仍在仓库外(/opt/aition-config/),仓库内为本文件的镜像;git pull 不会覆盖生产配置, 需手动 scp 同步
+www.aition.xin {
+	encode gzip zstd
+	reverse_proxy app:3000
+}
+aition.xin {
+	redir https://www.aition.xin{uri} permanent
+}
+
+# 二级代理分销系统 — test1 联调环境（2026-11-15 新增）
+# 反代到本机 172.19.0.1:18080（subagent-mall 编排的 web 容器）
+# 用网关 IP 而非容器名：宿主机重启时 Caddy 先起也能正常加载配置
+test1.aition.xin {
+	encode gzip zstd
+	reverse_proxy 172.19.0.1:18080
+}
+
+# B2C 二级分销小程序 — test2 联调环境（2026-11-16 新增）
+# 反代到本机 172.19.0.1:3020（b2c-distributor 编排的 api 容器）
+test2.aition.art {
+	encode gzip zstd
+	# admin-web 管理后台（静态容器，剥 /admin 前缀）
+	handle_path /admin/* {
+		reverse_proxy 172.19.0.1:3022
+	}
+	handle {
+		reverse_proxy 172.19.0.1:3020
+	}
+}

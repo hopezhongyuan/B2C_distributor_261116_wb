@@ -5,6 +5,8 @@ const config = require('../config');
 // 集成测试可经 DB_DIALECT=sqlite + DB_STORAGE=:memory: 覆盖（生产不受影响，默认 mysql）
 const dialect = process.env.DB_DIALECT || 'mysql';
 const options = {
+  host: config.db.host,
+  port: config.db.port,
   dialect,
   logging: config.env === 'development' ? console.log : false,
   define: {

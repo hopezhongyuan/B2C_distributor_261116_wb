@@ -9,6 +9,24 @@ function required(name) {
   return v || '';
 }
 
+// 生产启动 fail-fast：密钥强度 / 格式 / 支付配置完整性，错误配置在启动时暴露而非线上首单
+function assertProductionReady() {
+  if (process.env.NODE_ENV !== 'production') return;
+  if (String(process.env.JWT_SECRET || '').length < 32) {
+    throw new Error('JWT_SECRET must be >= 32 chars in production');
+  }
+  const aesKey = process.env.IDCARD_AES_KEY || '';
+  const decoded = Buffer.from(aesKey, 'base64');
+  if (!aesKey || decoded.length !== 32 || decoded.toString('base64') !== aesKey) {
+    throw new Error('IDCARD_AES_KEY must be base64 of exactly 32 bytes in production');
+  }
+  const wxpayRequired = ['WXPAY_MCHID', 'WXPAY_SERIAL', 'WXPAY_APIV3_KEY', 'WXPAY_PRIVATE_KEY_PATH', 'WXPAY_NOTIFY_URL'];
+  const missing = wxpayRequired.filter((k) => !process.env[k]);
+  if (missing.length) throw new Error('wxpay config incomplete in production, missing: ' + missing.join(','));
+}
+
+assertProductionReady();
+
 module.exports = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3000', 10),

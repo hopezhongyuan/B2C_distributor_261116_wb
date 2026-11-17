@@ -6,6 +6,7 @@ module.exports = {
   PARAM_INVALID: 1001,      // 参数错误
   UNAUTHORIZED: 1002,       // 未登录 / token 失效
   FORBIDDEN: 1003,          // 无权限
+  RATE_LIMITED: 1004,       // 请求过于频繁（限流）
 
   // 2xxx 商品
   PRODUCT_NOT_FOUND: 2001,

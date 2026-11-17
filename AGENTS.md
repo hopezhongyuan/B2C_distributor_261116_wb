@@ -102,6 +102,8 @@
 | server | jsonwebtoken | 小程序端与管理端 JWT 鉴权 |
 | server | 微信支付 v3 SDK（M0 定型，候选 wechatpay-node-v3） | 支付/退款/商家转账 |
 | server | node-cron | 定时对账任务 |
+| server | helmet | 安全响应头（2026-11-16 安全加固新增） |
+| server | express-rate-limit | 接口限流：登录防爆破 + 全局 /api 频控（2026-11-16 安全加固新增） |
 | admin-web | vue3 + tdesign-vue-next + axios | 后台前端 |
 
 - 鉴权约定：小程序端登录走 code2session 换 openid，服务端签发 JWT；管理端独立账号体系 + RBAC。

@@ -1,6 +1,6 @@
 // withdraw.service — 提现申请/概览/记录（契约：docs/api/withdraw.md）
 // 事务链：在途互斥 → 余额校验 → FOR UPDATE 锁定佣金 AVAILABLE→WITHDRAWING → 建单（待打款）
-const { Sequelize, sequelize, Op, Withdrawal, Commission, User, Config } = require('../models');
+const { sequelize, Op, Withdrawal, Commission, User, Config } = require('../models');
 const secret = require('../utils/secret');
 const config = require('../config');
 const ERRORS = require('../config/errors');

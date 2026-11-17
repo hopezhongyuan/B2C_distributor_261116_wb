@@ -5,12 +5,9 @@ const { Order, OrderItem, Product, sequelize, ORDER_STATUS } = require('../model
 const commissionService = require('./commission.service');
 const ERRORS = require('../config/errors');
 
-const PAY_EXPIRE_MINUTES = 30; // 与 configs.order_pay_expire_minutes 一致，M1 固定默认
+const PAY_EXPIRE_MINUTES = 30; // 分钟；与 configs.order_pay_expire_minutes 一致，M1 固定默认
 
-function genOrderNo() {
-  return 'B' + Date.now() + crypto.randomInt(1000, 9999);
-}
-
+const genOrderNo = () => 'B' + Date.now() + crypto.randomInt(1000, 9999);
 // 下单：事务内并发扣库存 + 建单（快照）；clientOrderId 幂等
 async function createOrder(userId, { items, receiverInfo, clientOrderId }) {
   if (!Array.isArray(items) || items.length < 1 || items.length > 20) {
@@ -174,4 +171,29 @@ async function markPaid(orderNo, transactionId, paidCents) {
   }
 }
 
-module.exports = { createOrder, listOrders, assertOwner, confirmReceipt, redeem, markPaid, PAY_EXPIRE_MINUTES };
+/** 关闭单笔待支付订单（事务+行锁重查防回调并发，归还库存）；超时关单与管理员关单共用 */
+async function closePendingOrder(orderId, reason) {
+  const t = await sequelize.transaction();
+  try {
+    const fresh = await Order.findOne({
+      where: { id: orderId, status: 'PENDING_PAY' },
+      transaction: t, lock: t.LOCK.UPDATE
+    });
+    if (!fresh) { await t.commit(); return false; } // 已被回调/其他进程处理
+    const items = await OrderItem.findAll({ where: { orderId: fresh.id }, transaction: t });
+    for (const it of items) {
+      await Product.update(
+        { stock: sequelize.literal(`\`stock\` + ${it.quantity}`) },
+        { where: { id: it.productId }, transaction: t }
+      );
+    }
+    await fresh.update({ status: 'CLOSED' }, { transaction: t });
+    await t.commit();
+    return true;
+  } catch (e) {
+    await t.rollback();
+    throw e;
+  }
+}
+
+module.exports = { createOrder, listOrders, assertOwner, confirmReceipt, redeem, markPaid, closePendingOrder, PAY_EXPIRE_MINUTES };

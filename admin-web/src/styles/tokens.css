@@ -1,0 +1,117 @@
+/* tokens.css — 唯一设计变量来源（docs/ui-spec.md §2）；页面禁止出现魔法值 */
+:root {
+  /* 主色（admin 与小程序共用） */
+  --c-primary: #2b5ce6;
+  --c-primary-hover: #1e4ed8;
+  --c-primary-active: #1a3fb0;
+  --c-primary-bg: #eef3ff;
+  --c-primary-border: #c7d7fb;
+  /* 强调色：价格/佣金/收益专用 */
+  --c-accent: #d93a3a;
+  /* 语义色 */
+  --c-success: #16a34a;
+  --c-warning: #e8a23a;
+  --c-danger: #dc2626;
+  --c-info: #2b5ce6;
+  /* 中性色 */
+  --t-1: #1f2329;
+  --t-2: #5a6472;
+  --t-3: #8a93a0;
+  --t-4: #b4bbc6;
+  --line: #e8ebf0;
+  --line-light: #f0f2f5;
+  --bg-page: #f5f7fa;
+  --bg-card: #ffffff;
+  --bg-hover: #f2f4f7;
+  --bg-muted: #fafbfc;
+  /* 圆角 */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  /* 阴影 */
+  --sh-1: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --sh-2: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --sh-3: 0 12px 32px rgba(16, 24, 40, 0.14);
+  /* 图表色板（按序取用） */
+  --chart-1: #2b5ce6;
+  --chart-2: #d93a3a;
+  --chart-3: #e8a23a;
+  --chart-4: #16a34a;
+  --chart-5: #7b61ff;
+  --chart-6: #0ea5e9;
+}
+
+/* —— TDesign 变量对齐（不改组件源码，不用 !important）—— */
+:root {
+  --td-brand-color: var(--c-primary);
+  --td-brand-color-hover: var(--c-primary-hover);
+  --td-brand-color-active: var(--c-primary-active);
+  --td-brand-color-light: var(--c-primary-bg);
+  --td-brand-color-focus: var(--c-primary-bg);
+  --td-brand-color-disabled: #b8c6f2;
+  --td-brand-color-light-hover: #e0eaff;
+  --td-success-color: var(--c-success);
+  --td-success-color-2: #e8f7ee;
+  --td-warning-color: var(--c-warning);
+  --td-warning-color-2: #fdf3e3;
+  --td-error-color: var(--c-danger);
+  --td-error-color-2: #fdeaea;
+  --td-radius-small: 3px;
+  --td-radius-medium: var(--r-sm);
+  --td-radius-large: var(--r-md);
+  --td-radius-round: var(--r-pill);
+  --td-comp-margin-xxl: 20px;
+  --td-text-color-primary: var(--t-1);
+  --td-text-color-secondary: var(--t-2);
+  --td-text-color-placeholder: var(--t-3);
+  --td-text-color-disabled: var(--t-4);
+  --td-component-stroke: var(--line);
+  --td-component-border: var(--line);
+  --td-bg-color-container: var(--bg-card);
+  --td-bg-color-page: var(--bg-page);
+  --td-bg-color-secondarycontainer: var(--bg-page);
+}
+
+/* 数字等宽（金额/统计全局生效） */
+.num,
+.money {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 价格/收益强调（红） */
+.money-accent {
+  color: var(--c-accent);
+  font-weight: 600;
+}
+
+/* 状态作废删除线 */
+.status-void {
+  text-decoration: line-through;
+}
+
+/* —— 页面卡片通用（ui-spec §3.1：白底 r-8 描边 sh-1）—— */
+.panel-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  padding: 20px;
+}
+.panel-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--t-1);
+  margin-bottom: 16px;
+}
+.panel-card-sub {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--t-3);
+}
+.panel-card-note {
+  color: var(--t-3);
+  font-size: 12px;
+  margin-top: 12px;
+}

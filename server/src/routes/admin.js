@@ -29,6 +29,8 @@ router.post('/products/:id/status', requireAdmin, requireRole(OPS), asyncHandler
 // 订单管理（M4）
 router.get('/orders', requireAdmin, asyncHandler(ctrl.orderList));
 router.post('/orders/:id/redeem', requireAdmin, requireRole(OPS), asyncHandler(ctrl.orderRedeem));
+// 批量关闭待支付订单（ui-spec v1.0 §3.3：仅 PENDING_PAY 可关，资金审核类接口不提供批量）
+router.post('/orders/batch-close', requireAdmin, requireRole(OPS), asyncHandler(ctrl.orderBatchClose));
 
 // 退款审核（批次 A）：读=全部；审核/打款=super+finance（资金红线与提现同级）
 router.get('/refunds', requireAdmin, asyncHandler(ctrl.refundList));

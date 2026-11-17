@@ -1,17 +1,30 @@
 <template>
   <div>
-    <!-- 核心指标卡 -->
+    <ProPageHeader title="数据看板" description="平台核心经营指标与成交转化全景（每日随支付与佣金结算实时更新）" />
+
+    <!-- 指标卡行 -->
     <div class="kpi-row">
-      <t-card v-for="k in kpis" :key="k.label" class="kpi-card" bordered>
-        <div class="kpi-label">{{ k.label }}</div>
-        <div class="kpi-value">{{ k.value }}</div>
-        <div v-if="k.sub" class="kpi-sub">{{ k.sub }}</div>
-      </t-card>
+      <StatCard label="GMV（有效支付）" :value="yuan(data.gmvCents)" tip="按支付时间统计的实付金额合计" />
+      <StatCard label="有效支付订单" :value="data.paidCount + ' 单'" :sub="'总下单 ' + data.createdCount + ' 单'" />
+      <StatCard
+        label="分销订单占比"
+        :value="pct(data.distributionRateBp)"
+        :sub="'分销成交 ' + data.distributionCount + ' 单 · 分销员 ' + (data.distributorCount ?? 0) + ' 人'"
+        tip="分销成交口径：产生过佣金记录（含作废）的去重订单"
+      />
+      <StatCard
+        label="佣金支出比"
+        :value="pct(data.commissionCostBp)"
+        :sub="'已结算 ' + yuan(data.commissionPaidCents) + ' / 产生 ' + yuan(data.commissionTotalCents)"
+        accent
+        tip="佣金支出比 = 已结算佣金 / 产生佣金总额"
+      />
     </div>
 
     <div class="panels">
-      <!-- 漏斗：下单 → 支付 → 分销成交 -->
-      <t-card title="成交漏斗" bordered class="panel">
+      <!-- 成交漏斗 -->
+      <div class="panel-card panel">
+        <div class="panel-card-title">成交漏斗</div>
         <div class="funnel">
           <div v-for="s in data.funnel" :key="s.key" class="funnel-step">
             <div class="funnel-bar" :class="'lv' + s.key" :style="{ width: barWidth(s.count) + '%' }">
@@ -20,28 +33,32 @@
             <div class="funnel-rate">较上级 {{ s.rate }}%</div>
           </div>
         </div>
-        <div class="panel-note">分销成交口径：产生过佣金记录（含作废）的去重订单</div>
-      </t-card>
+        <div class="panel-card-note">分销成交口径：产生过佣金记录（含作废）的去重订单</div>
+      </div>
 
       <!-- 近 14 天趋势 -->
-      <t-card title="近 14 天 GMV 趋势（按支付时间）" bordered class="panel">
-        <div class="trend">
+      <div class="panel-card panel">
+        <div class="panel-card-title">近 14 天 GMV 趋势<span class="panel-card-sub">按支付时间</span></div>
+        <div v-if="!data.trend.length" class="chart-empty">所选区间暂无数据</div>
+        <div v-else class="trend">
           <div v-for="d in data.trend" :key="d.day" class="trend-col">
-            <div class="trend-amount">{{ fmtShort(d.gmvCents) }}</div>
+            <div class="trend-amount num">{{ fmtShort(d.gmvCents) }}</div>
             <div class="trend-bar-wrap">
               <div class="trend-bar" :style="{ height: trendHeight(d.gmvCents) + '%' }"></div>
             </div>
             <div class="trend-day">{{ d.day.slice(5) }} · {{ d.paidCount }}单</div>
           </div>
         </div>
-      </t-card>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, computed, onMounted } from 'vue';
+import { reactive, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import ProPageHeader from '../components/base/ProPageHeader.vue';
+import StatCard from '../components/base/StatCard.vue';
 import http from '../api/request';
 import { fen2yuan } from '../utils/money';
 
@@ -53,17 +70,8 @@ const data = reactive({
   funnel: [], trend: []
 });
 
-const yuan = (c) => '¥' + fen2yuan(c, true); // 统一金额工具（千分位分组）
+const yuan = (c) => '¥' + fen2yuan(c, true);
 const pct = (bp) => (bp / 100).toFixed(1) + '%';
-
-const kpis = computed(() => [
-  { label: 'GMV（有效支付）', value: yuan(data.gmvCents) },
-  { label: '有效支付订单', value: data.paidCount + ' 单', sub: `总下单 ${data.createdCount} 单` },
-  { label: '支付转化率', value: pct(data.payRateBp) },
-  { label: '分销订单占比', value: pct(data.distributionRateBp), sub: `分销成交 ${data.distributionCount} 单` },
-  { label: '分销员数', value: String(data.distributorCount ?? 0), sub: `已带单 ${data.inviterCount ?? 0} 人` },
-  { label: '佣金支出比', value: pct(data.commissionCostBp), sub: `已结算 ${yuan(data.commissionPaidCents)} / 产生 ${yuan(data.commissionTotalCents)}` }
-]);
 
 // 漏斗宽度按最大层归一（保底 8% 避免零值不可见）
 function barWidth(count) {
@@ -95,32 +103,60 @@ onMounted(() => load());
 </script>
 
 <style scoped>
-.kpi-row { display: flex; gap: 12px; flex-wrap: wrap; }
-.kpi-card { flex: 1; min-width: 170px; }
-.kpi-label { color: #888; font-size: 12px; }
-.kpi-value { font-size: 22px; font-weight: 600; margin-top: 4px; }
-.kpi-sub { color: #aaa; font-size: 12px; margin-top: 2px; }
+.kpi-row { display: flex; gap: 16px; flex-wrap: wrap; }
 .panels { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
 .panel { flex: 1; min-width: 380px; }
-.panel-note { color: #999; font-size: 12px; margin-top: 12px; }
-/* 漏斗（品牌色：蓝主/橙分销/绿成交） */
+.chart-empty { height: 200px; display: flex; align-items: center; justify-content: center; color: var(--t-3); font-size: 13px; }
+/* 漏斗：主色 → 警告橙 → 成功绿（ui-spec 图表色板） */
 .funnel { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 .funnel-step { width: 100%; text-align: center; }
 .funnel-bar {
-  margin: 0 auto; min-height: 44px; min-width: 130px; border-radius: 6px; color: #fff;
-  white-space: nowrap; overflow: visible;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; transition: width 0.4s;
+  margin: 0 auto;
+  min-height: 44px;
+  min-width: 130px;
+  border-radius: var(--r-sm);
+  color: #fff;
+  white-space: nowrap;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: width 0.2s ease-out;
 }
-.lvcreated { background: linear-gradient(90deg, #2e6be6, #5b8ff0); max-width: 100%; }
-.lvpaid { background: linear-gradient(90deg, #ff8f1f, #ffab55); }
-.lvdistribution { background: linear-gradient(90deg, #00a870, #4cc79a); }
-.funnel-rate { color: #999; font-size: 12px; margin-top: 4px; }
-/* 趋势条形图 */
+.lvcreated {
+  background: linear-gradient(90deg, var(--c-primary), #5b8ff0);
+  max-width: 100%;
+}
+.lvpaid {
+  background: linear-gradient(90deg, var(--c-warning), #f0bd76);
+}
+.lvdistribution {
+  background: linear-gradient(90deg, var(--c-success), #4cc79a);
+}
+.funnel-rate {
+  color: var(--t-3);
+  font-size: 12px;
+  margin-top: 4px;
+}
+/* 趋势柱状图 */
 .trend { display: flex; align-items: flex-end; gap: 6px; height: 200px; padding-top: 8px; }
 .trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
-.trend-amount { font-size: 10px; color: #888; margin-bottom: 2px; }
+.trend-amount {
+  font-size: 10px;
+  color: var(--t-3);
+  margin-bottom: 2px;
+}
 .trend-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
-.trend-bar { width: 60%; background: #2e6be6; border-radius: 3px 3px 0 0; transition: height 0.4s; }
-.trend-day { font-size: 10px; color: #999; margin-top: 4px; }
+.trend-bar {
+  width: 60%;
+  background: var(--c-primary);
+  border-radius: 3px 3px 0 0;
+  transition: height 0.2s ease-out;
+}
+.trend-day {
+  font-size: 10px;
+  color: var(--t-3);
+  margin-top: 4px;
+}
 </style>

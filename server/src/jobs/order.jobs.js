@@ -4,35 +4,19 @@
 const cron = require('node-cron');
 const { Op } = require('sequelize');
 const config = require('../config');
-const { sequelize, Order, OrderItem, Product } = require('../models');
 const orderService = require('../services/order.service');
 const refundAdmin = require('../services/refund.admin.service');
 const wxpay = require('../services/wxpay.core');
 
 const RECONCILE_DELAY_MS = 2 * 60 * 1000; // 下单 2 分钟后才对账，给回调留窗口
 
-/** 关闭单笔订单（事务 + 行锁重查防与回调并发），归还库存 */
+/** 关闭单笔订单（事务 + 行锁重查防与回调并发），归还库存 —— 实现下沉 order.service，此处仅调度 */
 async function closeOne(order, reason) {
-  const t = await sequelize.transaction();
   try {
-    const fresh = await Order.findOne({
-      where: { id: order.id, status: 'PENDING_PAY' },
-      transaction: t, lock: t.LOCK.UPDATE
-    });
-    if (!fresh) { await t.commit(); return false; } // 已被回调/其他进程处理
-    const items = await OrderItem.findAll({ where: { orderId: fresh.id }, transaction: t });
-    for (const it of items) {
-      await Product.update(
-        { stock: sequelize.literal(`\`stock\` + ${it.quantity}`) },
-        { where: { id: it.productId }, transaction: t }
-      );
-    }
-    await fresh.update({ status: 'CLOSED' }, { transaction: t });
-    await t.commit();
-    console.log(`[job.order] closed ${fresh.orderNo} (${reason})`);
-    return true;
+    const ok = await orderService.closePendingOrder(order.id, reason);
+    if (ok) console.log(`[job.order] closed ${order.orderNo} (${reason})`);
+    return ok;
   } catch (e) {
-    await t.rollback();
     console.error(`[job.order] close ${order.orderNo} failed:`, e.msg || e.message);
     return false;
   }

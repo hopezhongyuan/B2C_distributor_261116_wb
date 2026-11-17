@@ -166,6 +166,13 @@
 - 权限：super/ops
 - 核销成功返回 `{ orderId, status: 'REDEEMED' }`
 
+`POST /api/admin/orders/batch-close`（批量关闭待支付订单，ui-spec v1.0 §3.3）
+
+- 入参：`ids: number[]`（1–50 个订单 id）
+- 行为：仅 `PENDING_PAY` 可关；逐单事务关单（行锁防回调并发）并归还库存；跳过非待付款订单
+- 返回：`{ closed, skipped }`；权限：super/ops；审计动作 `order_close`
+- 错误码：1001（ids 非法）/ 1003（无权限）
+
 ## 9. 分销员管理（M4）
 
 `GET /api/admin/distributors`

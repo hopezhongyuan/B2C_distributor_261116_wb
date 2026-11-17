@@ -1,97 +1,193 @@
 <template>
-  <t-card title="订单管理" bordered>
-    <template #actions>
-      <t-input v-model="orderNo" placeholder="订单号精确查询" style="width:220px" clearable @enter="load(1)" />
-      <t-select v-model="status" clearable style="width:150px;margin-left:8px" placeholder="状态" @change="load(1)">
-        <t-option v-for="(l, k) in STATUS" :key="k" :value="k" :label="l" />
-      </t-select>
-      <t-button style="margin-left:8px" @click="load(1)">查询</t-button>
-    </template>
-    <t-table :loading="loading" :columns="columns" :data="rows" row-key="id" :pagination="pagination" @page-change="onPage">
-      <template #amount="{ row }">¥{{ fen2yuan(row.amountCents) }}</template>
-      <template #ctime="{ row }">{{ fmtTime(row.createdAt) }}</template>
-      <template #ostatus="{ row }">
-        <t-tag :theme="TAG[row.status] || 'default'">{{ STATUS[row.status] || row.status }}</t-tag>
+  <div>
+    <ProPageHeader title="订单管理" description="查询订单、核销虚拟服务、关闭超时未支付的订单">
+      <template #default>
+        <span class="hint">勾选行可批量关闭待付款订单</span>
       </template>
-      <template #items="{ row }">
-        <div v-for="(it, i) in row.items" :key="i" class="item-line">{{ it.title }} ×{{ it.quantity }}</div>
-      </template>
-      <template #op="{ row }">
-        <t-popconfirm v-if="row.status === 'PAID' && row.items && row.items.length" content="确认核销该虚拟订单？核销后佣金立即解冻"
-          @confirm="redeem(row)">
-          <t-button size="small" theme="primary">核销</t-button>
-        </t-popconfirm>
-        <span v-else-if="row.status === 'REDEEMED'" class="done">已核销</span>
-      </template>
-    </t-table>
-  </t-card>
+    </ProPageHeader>
+
+    <div class="panel-card">
+      <ProFilterBar
+        :fields="[
+          { key: 'orderNo', label: '订单号', placeholder: '订单号精确查询', width: 220 },
+          { key: 'status', label: '状态', type: 'select', width: 150, options: STATUS_OPTIONS }
+        ]"
+        :model="filters"
+        @update:model="filters = $event"
+        @search="reload"
+      />
+
+      <!-- 批量操作条（ui-spec §3.3：仅待付款可勾选） -->
+      <div v-if="selected.length" class="batch-bar">
+        已选 <b class="num">{{ selected.length }}</b> 笔待付款订单，将关闭订单并归还库存
+        <t-button theme="danger" size="small" :loading="closing" @click="confirmBatchClose">关闭选中订单</t-button>
+        <t-button variant="text" size="small" @click="clearSelection">取消</t-button>
+      </div>
+
+      <ProTable
+        ref="tableRef"
+        :columns="columns"
+        :fetch="fetchOrders"
+        :filter-keys="filters"
+        selectable
+        :selectable-disabled="(row) => row.status !== 'PENDING_PAY'"
+        empty-text="还没有订单"
+        empty-filtered-text="没有符合条件的订单"
+        @selection-change="onSelection"
+        @clear-filter="clearFilter"
+      >
+        <template #amount="{ row }">
+          <ProMoney :cents="row.amountCents" />
+        </template>
+        <template #ostatus="{ row }">
+          <ProStatusTag domain="order" :value="row.status" />
+        </template>
+        <template #ctime="{ row }">{{ fmtTime(row.createdAt) }}</template>
+        <template #items="{ row }">
+          <div v-for="(it, i) in row.items" :key="i" class="item-line">
+            {{ it.title }} ×{{ it.quantity }}
+          </div>
+        </template>
+        <template #op="{ row }">
+          <t-button v-if="row.status === 'PAID' && row.items && row.items.length" variant="text" theme="primary"
+            size="small" @click="redeem(row)">核销</t-button>
+          <t-button variant="text" theme="default" size="small" @click="copyOrderNo(row.orderNo)">复制单号</t-button>
+        </template>
+      </ProTable>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { ref } from 'vue';
+import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next';
+import ProPageHeader from '../components/base/ProPageHeader.vue';
+import ProFilterBar from '../components/base/ProFilterBar.vue';
+import ProTable from '../components/base/ProTable.vue';
+import ProStatusTag from '../components/base/ProStatusTag.vue';
+import ProMoney from '../components/base/ProMoney.vue';
 import http from '../api/request';
-import { fen2yuan } from '../utils/money';
 
-const STATUS = {
-  PENDING_PAY: '待付款', PAID: '已支付', REDEEMED: '已核销', COMPLETED: '已完成', CLOSED: '已关闭', REFUNDED: '已退款'
-};
-const TAG = { PENDING_PAY: 'warning', PAID: 'primary', REDEEMED: 'success', COMPLETED: 'success', CLOSED: 'default', REFUNDED: 'danger' };
+const STATUS_OPTIONS = [
+  { value: 'PENDING_PAY', label: '待付款' },
+  { value: 'PAID', label: '已支付' },
+  { value: 'REDEEMED', label: '已核销' },
+  { value: 'COMPLETED', label: '已完成' },
+  { value: 'CLOSED', label: '已关闭' },
+  { value: 'REFUNDING', label: '退款中' },
+  { value: 'REFUNDED', label: '已退款' }
+];
 
-const loading = ref(false);
-const status = ref('');
-const orderNo = ref('');
-const rows = ref([]);
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 });
+const filters = ref({ orderNo: '', status: '' });
+const tableRef = ref(null);
+const selected = ref([]);
+const closing = ref(false);
 
 const columns = [
   { colKey: 'orderNo', title: '订单号', width: 210 },
   { colKey: 'buyerNickname', title: '买家', width: 110 },
-  { colKey: 'items', title: '商品', ellipsis: false },
-  { colKey: 'amount', title: '金额', width: 100 },
-  { colKey: 'ostatus', title: '状态', width: 90 },
+  { colKey: 'items', title: '商品' },
+  { colKey: 'amount', title: '实付金额', width: 110, align: 'right' },
+  { colKey: 'ostatus', title: '状态', width: 96 },
   { colKey: 'ctime', title: '下单时间', width: 170 },
-  { colKey: 'op', title: '操作', width: 100 }
+  { colKey: 'op', title: '操作', width: 150 }
 ];
 
-// ISO → 本地可读时间
-function fmtTime(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString('zh-CN', { hour12: false });
+async function fetchOrders({ page, pageSize }) {
+  const data = await http.get('/admin/orders', {
+    params: {
+      status: filters.value.status || undefined,
+      orderNo: filters.value.orderNo || undefined,
+      page,
+      pageSize
+    }
+  });
+  return data;
 }
 
-async function load(page = 1) {
-  loading.value = true;
-  try {
-    const data = await http.get('/admin/orders', {
-      params: { status: status.value || undefined, orderNo: orderNo.value || undefined, page, pageSize: 20 }
-    });
-    rows.value = data.list;
-    pagination.current = page;
-    pagination.total = data.total;
-  } catch (e) {
-    MessagePlugin.error(e.msg || '加载失败');
-  } finally {
-    loading.value = false;
-  }
+function reload() {
+  tableRef.value && tableRef.value.reload();
 }
 
-function onPage(info) { load(info.current); }
+function onSelection(keys) {
+  selected.value = keys;
+}
+function clearSelection() {
+  selected.value = [];
+  reload();
+}
+function clearFilter() {
+  filters.value = { orderNo: '', status: '' };
+  reload();
+}
+
+function confirmBatchClose() {
+  const d = DialogPlugin.confirm({
+    header: '关闭选中订单',
+    body: `将关闭 ${selected.value.length} 笔待付款订单并归还库存，用户将无法再支付这些订单，操作不可恢复。`,
+    confirmBtn: { content: '确认关闭', theme: 'danger' },
+    onConfirm: async () => {
+      closing.value = true;
+      try {
+        const r = await http.post('/admin/orders/batch-close', { ids: selected.value });
+        MessagePlugin.success(`已关闭 ${r.closed} 笔，跳过 ${r.skipped} 笔`);
+        d.destroy();
+        reload();
+      } catch (e) {
+        MessagePlugin.error(e.msg || '关闭失败');
+      } finally {
+        closing.value = false;
+      }
+    }
+  });
+}
 
 async function redeem(row) {
   try {
     await http.post(`/admin/orders/${row.id}/redeem`);
     MessagePlugin.success('核销成功，佣金已解冻为可提现');
-    load();
+    reload();
   } catch (e) {
     MessagePlugin.error(e.msg || '核销失败');
   }
 }
 
-onMounted(() => load());
+async function copyOrderNo(no) {
+  try {
+    await navigator.clipboard.writeText(no);
+    MessagePlugin.success('订单号已复制');
+  } catch (_e) {
+    MessagePlugin.warning('复制失败，请手动选择复制');
+  }
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 </script>
 
 <style scoped>
-.item-line { line-height: 1.6; }
-.done { color: var(--td-success-color, #2ba471); font-size: 12px; }
+.hint {
+  font-size: 13px;
+  color: var(--t-3);
+}
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 8px 12px;
+  background: var(--c-primary-bg);
+  border: 1px solid var(--c-primary-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--t-2);
+}
+.item-line {
+  line-height: 1.6;
+  color: var(--t-2);
+}
 </style>

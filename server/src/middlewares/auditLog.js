@@ -18,6 +18,7 @@ function summarize(body) {
 // 路径 → 动作语义（与人读的审计语言对齐）
 function toAction(method, path) {
   if (path.startsWith('/login')) return 'login';
+  if (path.includes('batch-close')) return 'order_close';
   const map = [
     ['/withdraws', 'withdraw_review'],
     ['/refunds', 'refund_audit'],

@@ -65,6 +65,9 @@ async function orderList(req, res) {
 async function orderRedeem(req, res) {
   return ok(res, await orderAdmin.redeem(numId(req.params.id), req.admin));
 }
+async function orderBatchClose(req, res) {
+  return ok(res, await orderAdmin.batchClose((req.body || {}).ids, req.admin));
+}
 
 // —— 分销员管理 ——
 async function distributorList(req, res) {
@@ -130,7 +133,7 @@ async function auditLogList(req, res) {
 module.exports = {
   login, withdrawList, withdrawReview, withdrawSync,
   productList, productCreate, productUpdate, productStatus,
-  orderList, orderRedeem, distributorList, distributorStatus, distributorDetail, relationList,
+  orderList, orderRedeem, orderBatchClose, distributorList, distributorStatus, distributorDetail, relationList,
   commissionSummary, commissionList, commissionByOrder, dashboard,
   refundList, refundAudit, refundRetry,
   configList, configUpdate, auditLogList

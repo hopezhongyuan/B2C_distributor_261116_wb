@@ -54,4 +54,18 @@ async function redeem(orderId, admin) {
   return { orderId: order.id, orderNo: order.orderNo, status: order.status };
 }
 
-module.exports = { list, redeem, maskNickname, STATUSES, ORDER_STATUS, Sequelize, Op };
+/** 批量关闭待支付订单：仅 PENDING_PAY 可关（关单=行锁+还库存，与回调并发安全），上限 50 */
+async function batchClose(ids, admin) {
+  if (!['super', 'ops'].includes(admin.role)) throw { code: ERRORS.FORBIDDEN, msg: '无权限操作' };
+  if (!Array.isArray(ids) || !ids.length || ids.length > 50 || ids.some((i) => !Number.isInteger(i))) {
+    throw { code: ERRORS.PARAM_INVALID, msg: 'ids 非法（1-50 个整数）' };
+  }
+  const orders = await Order.findAll({ where: { id: { [Op.in]: ids }, status: 'PENDING_PAY' } });
+  let closed = 0;
+  for (const o of orders) {
+    if (await orderService.closePendingOrder(o.id, 'admin closed')) closed += 1;
+  }
+  return { closed, skipped: ids.length - closed };
+}
+
+module.exports = { list, redeem, batchClose, maskNickname, STATUSES, ORDER_STATUS, Sequelize, Op };

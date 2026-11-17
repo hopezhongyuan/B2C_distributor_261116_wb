@@ -112,7 +112,7 @@ const detail = ref(null);
 
 async function openDetail(row) {
   try {
-    const { data } = await http.get(`/admin/distributors/${row.userId}/detail`);
+    const data = await http.get(`/admin/distributors/${row.userId}/detail`);
     detail.value = data;
     detailVisible.value = true;
   } catch (e) {

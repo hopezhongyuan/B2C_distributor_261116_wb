@@ -14,6 +14,11 @@ function requireUser(req, res, next) {
   }
   try {
     const payload = jwt.verify(token, config.jwt.secret);
+    // 安全隔离：admin token（scope='admin'，无 uid）不得充当用户凭证，
+    // uid 非整数时拒绝，防止下游 where 条件被剔除 undefined 导致越权拉全库数据
+    if (payload.scope === 'admin' || !Number.isInteger(payload.uid)) {
+      return res.status(200).json({ code: ERRORS.UNAUTHORIZED, msg: '无效凭证', data: null });
+    }
     req.user = { uid: payload.uid };
     return next();
   } catch (_e) {
@@ -36,7 +41,7 @@ function requireAdmin(req, res, next) {
   if (!token) return res.status(200).json({ code: ERRORS.UNAUTHORIZED, msg: '未登录', data: null });
   try {
     const payload = jwt.verify(token, config.jwt.secret);
-    if (payload.scope !== 'admin') throw new Error('scope');
+    if (payload.scope !== 'admin' || !Number.isInteger(payload.aid)) throw new Error('scope');
     req.admin = { aid: payload.aid, role: payload.role };
     return next();
   } catch (_e) {

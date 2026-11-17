@@ -3,9 +3,11 @@
 // M2: 佣金结算扫描（每小时）—— COMPLETED + 售后期满 FROZEN → AVAILABLE
 // M3: 每日对账（00:30）—— 应计佣金 vs 佣金流水（AGENTS.md §12）
 const { startOrderJobs } = require('./order.jobs');
+const { startCommissionJobs } = require('./commission.jobs');
 
 function startJobs() {
   startOrderJobs();
+  startCommissionJobs();
 }
 
 module.exports = { startJobs };

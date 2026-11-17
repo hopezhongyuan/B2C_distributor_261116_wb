@@ -68,10 +68,12 @@ function fmtTime(iso) {
 async function load(page = 1) {
   loading.value = true;
   try {
-    const { data } = await http.get('/admin/refunds', { params: { status: status.value || undefined, page, pageSize: 20 } });
+    const data = await http.get('/admin/refunds', { params: { status: status.value || undefined, page, pageSize: 20 } });
     rows.value = fmtCols(data.list);
     pagination.current = data.page;
     pagination.total = data.total;
+  } catch (e) {
+    MessagePlugin.error(e.msg || '加载失败');
   } finally {
     loading.value = false;
   }

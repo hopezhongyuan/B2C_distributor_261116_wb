@@ -103,7 +103,7 @@ async function refundList(req, res) {
 async function refundAudit(req, res) {
   const body = req.body || {};
   return ok(res, await refundAdmin.audit(numId(req.params.id), {
-    approve: body.approve === true, note: body.note, adminId: req.admin.id
+    approve: body.approve === true, note: body.note, adminId: req.admin.aid
   }));
 }
 async function refundRetry(req, res) {

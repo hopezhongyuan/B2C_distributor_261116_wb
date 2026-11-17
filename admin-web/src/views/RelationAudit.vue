@@ -42,7 +42,7 @@ function fmtTime(iso) {
 async function load(page = 1) {
   loading.value = true;
   try {
-    const { data } = await http.get('/admin/relations', {
+    const data = await http.get('/admin/relations', {
       params: { userId: userId.value || undefined, page, pageSize: 20 }
     });
     rows.value = data.list;

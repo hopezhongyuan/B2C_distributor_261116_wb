@@ -8,8 +8,8 @@
       </template>
       <t-table :loading="loading" :columns="columns" :data="rows" row-key="id" :pagination="pagination"
         @page-change="onPage">
-        <template #amount="{ row }">¥{{ (row.amountCents / 100).toFixed(2) }}</template>
-        <template #orderAmount="{ row }">¥{{ ((row.order && row.order.payableCents || 0) / 100).toFixed(2) }}</template>
+        <template #amount="{ row }">¥{{ fen2yuan(row.amountCents) }}</template>
+        <template #orderAmount="{ row }">¥{{ fen2yuan(row.order && row.order.payableCents) }}</template>
         <template #status="{ row }">
           <t-tag :theme="TAG_THEME[row.status] || 'default'">{{ STATUS[row.status] || row.status }}</t-tag>
         </template>
@@ -34,6 +34,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import http from '../api/request';
+import { fen2yuan } from '../utils/money';
 
 const STATUS = { PENDING: '待审核', APPROVED: '退款中', REFUNDED: '已退款', REJECTED: '已驳回', FAILED: '退款失败' };
 const TAG_THEME = { PENDING: 'warning', APPROVED: 'primary', REFUNDED: 'success', REJECTED: 'danger', FAILED: 'danger' };

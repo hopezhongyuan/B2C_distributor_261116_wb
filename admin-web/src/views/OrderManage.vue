@@ -8,7 +8,7 @@
       <t-button style="margin-left:8px" @click="load(1)">查询</t-button>
     </template>
     <t-table :loading="loading" :columns="columns" :data="rows" row-key="id" :pagination="pagination" @page-change="onPage">
-      <template #amount="{ row }">¥{{ ((row.amountCents || 0) / 100).toFixed(2) }}</template>
+      <template #amount="{ row }">¥{{ fen2yuan(row.amountCents) }}</template>
       <template #ctime="{ row }">{{ fmtTime(row.createdAt) }}</template>
       <template #ostatus="{ row }">
         <t-tag :theme="TAG[row.status] || 'default'">{{ STATUS[row.status] || row.status }}</t-tag>
@@ -31,6 +31,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import http from '../api/request';
+import { fen2yuan } from '../utils/money';
 
 const STATUS = {
   PENDING_PAY: '待付款', PAID: '已支付', REDEEMED: '已核销', COMPLETED: '已完成', CLOSED: '已关闭', REFUNDED: '已退款'

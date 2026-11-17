@@ -8,7 +8,7 @@
       </template>
       <t-table :loading="loading" :columns="columns" :data="rows" row-key="id" :pagination="pagination"
         @page-change="onPage">
-        <template #amount="{ row }">¥{{ (row.amountCents / 100).toFixed(2) }}</template>
+        <template #amount="{ row }">¥{{ fen2yuan(row.amountCents) }}</template>
         <template #status="{ row }">
           <t-tag :theme="TAG_THEME[row.status] || 'default'">{{ STATUS[row.status] || row.status }}</t-tag>
         </template>
@@ -34,6 +34,7 @@
 import { reactive, ref, computed, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import http from '../api/request';
+import { fen2yuan } from '../utils/money';
 
 const STATUS = { pending: '待审核', approved: '待打款', rejected: '已驳回', paid: '已到账', failed: '打款失败' };
 const TAG_THEME = { pending: 'warning', approved: 'primary', rejected: 'danger', paid: 'success', failed: 'danger' };

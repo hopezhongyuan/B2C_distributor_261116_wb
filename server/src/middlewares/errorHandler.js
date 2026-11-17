@@ -10,7 +10,6 @@ function fail(res, code, msg, httpStatus = 200) {
 }
 
 // 兜底错误中间件：放在所有路由之后；业务层抛出 {code, msg} 会被透传
-// eslint-disable-next-line no-unused-vars
 function errorHandler(err, _req, res, _next) {
   if (err && err.code && Number.isInteger(err.code)) {
     return fail(res, err.code, err.msg || '业务错误');

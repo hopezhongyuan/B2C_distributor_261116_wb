@@ -43,6 +43,7 @@
 import { reactive, computed, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import http from '../api/request';
+import { fen2yuan } from '../utils/money';
 
 const data = reactive({
   gmvCents: 0, paidCount: 0, createdCount: 0, distributionCount: 0,
@@ -52,7 +53,7 @@ const data = reactive({
   funnel: [], trend: []
 });
 
-const yuan = (c) => '¥' + (c / 100).toLocaleString('zh-CN', { maximumFractionDigits: 2 });
+const yuan = (c) => '¥' + fen2yuan(c, true); // 统一金额工具（千分位分组）
 const pct = (bp) => (bp / 100).toFixed(1) + '%';
 
 const kpis = computed(() => [

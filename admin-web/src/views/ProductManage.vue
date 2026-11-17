@@ -12,8 +12,8 @@
         <t-button theme="primary" style="margin-left:8px" @click="openForm()">新建商品</t-button>
       </template>
       <t-table :loading="loading" :columns="columns" :data="rows" row-key="id" :pagination="pagination" @page-change="onPage">
-        <template #price="{ row }">¥{{ (row.priceCents / 100).toFixed(2) }}</template>
-        <template #rate="{ row }">L1 {{ (row.commissionRateL1Bp / 100).toFixed(1) }}% / L2 {{ (row.commissionRateL2Bp / 100).toFixed(1) }}%</template>
+        <template #price="{ row }">¥{{ fen2yuan(row.priceCents) }}</template>
+        <template #rate="{ row }">L1 {{ bp2pct(row.commissionRateL1Bp, 1) }}% / L2 {{ bp2pct(row.commissionRateL2Bp, 1) }}%</template>
         <template #pstatus="{ row }">
           <t-tag :theme="{ on: 'success', off: 'default', draft: 'warning' }[row.status]">{{ PST[row.status] }}</t-tag>
         </template>
@@ -51,6 +51,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import http from '../api/request';
+import { fen2yuan, bp2pct } from '../utils/money';
 
 const PST = { draft: '草稿', on: '上架', off: '下架' };
 const loading = ref(false);
@@ -95,7 +96,7 @@ function openForm(row) {
     id: row ? row.id : null,
     title: row ? row.title : '',
     type: row ? row.type : 'physical',
-    priceYuan: row ? (row.priceCents / 100).toFixed(2) : '',
+    priceYuan: row ? fen2yuan(row.priceCents) : '',
     stock: row ? String(row.stock) : '0',
     rateL1: row ? String(row.commissionRateL1Bp / 100) : '',
     rateL2: row ? String(row.commissionRateL2Bp / 100) : '',

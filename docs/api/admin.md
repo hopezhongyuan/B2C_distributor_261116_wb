@@ -292,9 +292,9 @@ APPROVED 状态重试打款（同 refundNo 幂等）。权限同上。
 
 **冲销规则**（PRD §3.3，实现在 refund.calc + commission.service）：全额退 → FROZEN/AVAILABLE 佣金 VOID；部分退 → 按退款比例扣减（四舍五入到分）；WITHDRAWING/PAID 佣金 → 计入受益人 debt_cents 欠款，提现冻结直至还清。全额退实物订单归还库存。
 
-## 14. 预留（后续迭代）
+## 14. 批次 C/D 接口（已上线，2026-11-16）
 
-RBAC 细粒度权限点、操作审计表、Redis 登录限流。
+以下接口已实现并上线（原"预留"清单，均已随批次 C/D 交付）；仍预留的是 RBAC 细粒度权限点、操作审计表、Redis 登录限流（见 §15 待办）。
 
 ### GET /admin/distributors/:id/detail（批次C）
 
@@ -311,3 +311,7 @@ RBAC 细粒度权限点、操作审计表、Redis 登录限流。
 ### 看板补充字段（批次D）
 
 `GET /admin/dashboard` 新增 `distributorCount`（active 分销员数）、`inviterCount`（产生过佣金的去重受益人数）。
+
+## 15. 仍预留（后续迭代）
+
+RBAC 细粒度权限点（模块级 `meta.roles`）、操作审计表、Redis 登录限流（当前为 express-rate-limit 内存限流，多实例部署需升级）。

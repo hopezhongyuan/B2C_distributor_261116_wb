@@ -106,6 +106,8 @@
 | server | express-rate-limit | 接口限流：登录防爆破 + 全局 /api 频控（2026-11-16 安全加固新增） |
 | server | sqlite3（dev） | 集成测试内存库（DB_DIALECT=sqlite，生产不加载）（2026-11-17 新增） |
 | admin-web | vitest（dev） | 单测运行器（金额工具等纯逻辑）（2026-11-17 新增） |
+| server/admin-web | eslint@9 + @eslint/js + globals（dev） | ESLint 9 flat config 迁移（2026-11-17，ESLint 8 已 EOL） |
+| admin-web | eslint-plugin-vue@9（dev） | Vue SFC 规则（flat/essential） |
 | admin-web | vue3 + tdesign-vue-next + axios | 后台前端 |
 
 - 鉴权约定：小程序端登录走 code2session 换 openid，服务端签发 JWT；管理端独立账号体系 + RBAC。

@@ -6,7 +6,7 @@
         <div class="summary-title">
           <t-tag :theme="TAG_THEME[s.key] || 'default'" size="small">{{ STATUS[s.key] || (s.key === 'UNSETTLED' ? '未结算' : s.key) }}</t-tag>
         </div>
-        <div class="summary-amount">¥{{ (s.amountCents / 100).toFixed(2) }}</div>
+        <div class="summary-amount">¥{{ fen2yuan(s.amountCents) }}</div>
         <div class="summary-count">{{ s.key === 'UNSETTLED' ? '冻结+可用+提现中 · ' + s.count + ' 笔' : s.count + ' 笔' }}</div>
       </t-card>
     </div>
@@ -35,8 +35,8 @@
             {{ row.level === 1 ? '一级' : '二级' }}
           </t-tag>
         </template>
-        <template #rate="{ row }">{{ (row.rateBp / 100).toFixed(2) }}%</template>
-        <template #amount="{ row }">¥{{ (row.amountCents / 100).toFixed(2) }}</template>
+        <template #rate="{ row }">{{ bp2pct(row.rateBp) }}%</template>
+        <template #amount="{ row }">¥{{ fen2yuan(row.amountCents) }}</template>
         <template #status="{ row }">
           <t-tag :theme="TAG_THEME[row.status] || 'default'">{{ STATUS[row.status] || row.status }}</t-tag>
         </template>
@@ -46,10 +46,10 @@
 
       <t-table v-else :loading="batchLoading" :columns="batchColumns" :data="batchRows" row-key="orderId"
         :pagination="batchPagination" @page-change="onBatchPage">
-        <template #payable="{ row }">¥{{ (row.payableCents / 100).toFixed(2) }}</template>
-        <template #total="{ row }">¥{{ (row.totalCents / 100).toFixed(2) }}</template>
-        <template #paid="{ row }">¥{{ (row.paidCents / 100).toFixed(2) }}</template>
-        <template #void="{ row }">{{ row.voidCents ? '¥' + (row.voidCents / 100).toFixed(2) : '—' }}</template>
+        <template #payable="{ row }">¥{{ fen2yuan(row.payableCents) }}</template>
+        <template #total="{ row }">¥{{ fen2yuan(row.totalCents) }}</template>
+        <template #paid="{ row }">¥{{ fen2yuan(row.paidCents) }}</template>
+        <template #void="{ row }">{{ fen2yuanCn(row.voidCents) }}</template>
         <template #createdAt="{ row }">{{ fmtTime(row.createdAt) }}</template>
       </t-table>
     </t-card>
@@ -60,6 +60,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import http from '../api/request';
+import { fen2yuan, fen2yuanCn, bp2pct } from '../utils/money';
 
 // 与后端 COMMISSION_STATUS 枚举一致；UNSETTLED 为前端汇总口径（未结算 = FROZEN+AVAILABLE+WITHDRAWING）
 const STATUS = { FROZEN: '冻结中', AVAILABLE: '可结算', WITHDRAWING: '提现中', PAID: '已结算', VOID: '已作废' };

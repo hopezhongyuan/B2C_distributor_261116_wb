@@ -82,11 +82,13 @@
 **错误码**：1002 / 3001 / 3002（状态非 DELIVERED）。
 **幂等性**：状态机保证，重复调用返回 3002。
 
-## POST /api/orders/:id/redeem
+## ~~POST /api/orders/:id/redeem~~（已迁移，勿调用）
 
-**功能描述**：虚拟服务核销，PAID → REDEEMED（视同完成态）。**核销时直接生成 AVAILABLE 佣金**（PRD 决策 #3「核销后结」，无售后期）。
-**错误码**：1003（非管理员） / 3001 / 3002（状态非 PAID）。
-**幂等性**：状态机保证 + idempotency_keys 记录核销操作流水。
+**迁移说明（2026-11-16 RBAC 收口）**：虚拟核销已迁至管理端 —— `POST /api/admin/orders/:id/redeem`（super/ops 角色，契约见 docs/api/admin.md §8）。用户级路由已在 `server/src/routes/order.js` 移除，调用方请改走管理端接口。业务语义不变：PAID → REDEEMED，核销时生成 AVAILABLE 佣金（PRD 决策 #3「核销后结」）。
+
+## POST /api/payment/notify（归属说明）
+
+支付/退款回调实际路由在 `routes/payment.js`（模块 `/api/payment`），本文档为保持下单链路叙述完整而收录：`POST /api/payment/notify`（支付回调）与 `POST /api/payment/refund-notify`（退款回调），均验签 + 幂等，详见源码契约注释。
 
 ## POST /api/orders/:id/refund
 

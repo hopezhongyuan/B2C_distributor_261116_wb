@@ -58,6 +58,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import http from '../api/request';
+import { fen2yuan } from '../utils/money';
 
 const loading = ref(false);
 const keyword = ref('');
@@ -76,7 +77,8 @@ const columns = [
   { colKey: 'op', title: '操作', width: 100 }
 ];
 
-const fen = (v) => ((v || 0) / 100).toFixed(2);
+// 金额展示统一走 utils/money（fen2yuan 已兜底 null/undefined）
+const fen = (v) => fen2yuan(v);
 const total = (c) => fen(Object.values(c || {}).reduce((a, b) => a + b, 0));
 
 async function load(page = 1) {

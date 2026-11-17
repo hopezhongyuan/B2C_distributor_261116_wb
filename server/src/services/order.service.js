@@ -151,15 +151,21 @@ async function markPaid(orderNo, transactionId, paidCents) {
       include: [{ model: OrderItem, as: 'OrderItems' }], transaction: t, lock: t.LOCK.UPDATE
     });
     if (!order) throw { code: ERRORS.ORDER_NOT_FOUND, msg: '订单不存在' };
+    // 幂等短路在前：已落账订单的重复回调直接返回，金额差异交由对账 job 处理
+    // （防微信立减/优惠场景 payer_total != total 导致回调被误拒、无限重试）
+    if (order.status !== 'PENDING_PAY') {
+      await t.commit();
+      return order;
+    }
     if (paidCents !== null && paidCents !== undefined && paidCents !== order.payableCents) {
       throw { code: ERRORS.WX_API_ERROR, msg: '回调金额与订单不一致' };
     }
-    if (order.status !== 'PENDING_PAY') {
-      await t.commit();
-      return order; // 幂等：已支付/已关闭的重复回调不重复落账
-    }
     await order.update({ status: 'PAID', payTime: new Date(), transactionId }, { transaction: t });
-    await commissionService.generateForOrder(order, order.OrderItems, order.userId, 'frozen', t);
+    // 虚拟订单佣金核销后结（PRD 决策 #3）：支付时不生成，由 redeem 以 AVAILABLE 模式生成；
+    // 否则 FROZEN 行先占唯一索引，redeem 的 findOrCreate 无法再生成 AVAILABLE 佣金
+    if (order.type !== 'virtual') {
+      await commissionService.generateForOrder(order, order.OrderItems, order.userId, 'frozen', t);
+    }
     await t.commit();
     return order;
   } catch (e) {

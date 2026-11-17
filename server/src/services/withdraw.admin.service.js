@@ -1,6 +1,6 @@
 // withdraw.admin.service — 提现管理：列表 / 审核（驳回退款·通过打款）/ 结果同步
 // 契约：docs/api/admin.md §2–§4；资金红线：只进不出，退款/打款均不绕过佣金状态机
-const { Sequelize, Withdrawal, Commission, User } = require('../models');
+const { sequelize, Withdrawal, Commission, User } = require('../models');
 const secret = require('../utils/secret');
 const transfer = require('./transfer.service');
 const ERRORS = require('../config/errors');
@@ -55,7 +55,7 @@ async function review(id, action, admin, rejectReason) {
     if (!rejectReason || !String(rejectReason).trim()) {
       throw { code: ERRORS.PARAM_INVALID, msg: '驳回原因必填' };
     }
-    return Sequelize.transaction(async (t) => {
+    return sequelize.transaction(async (t) => {
       const w = await lockPending(id, t);
       await w.update(
         {
@@ -75,7 +75,7 @@ async function review(id, action, admin, rejectReason) {
     const w0 = await Withdrawal.findByPk(id, { include: [{ model: User }] });
     if (!w0) throw { code: ERRORS.PARAM_INVALID, msg: '提现单不存在' };
     if (!w0.User.realName) throw { code: ERRORS.WITHDRAW_REALNAME_MISSING, msg: '申请人未实名' };
-    const w = await Sequelize.transaction(async (t) => {
+    const w = await sequelize.transaction(async (t) => {
       const locked = await lockPending(id, t);
       return locked;
     });
@@ -103,7 +103,7 @@ async function sync(id) {
   if (res.detailStatus === 'SUCCESS' && w.status !== 'paid') {
     await w.update({ status: 'paid' });
   } else if (res.detailStatus === 'FAIL' && w.status !== 'failed') {
-    await Sequelize.transaction(async (t) => {
+    await sequelize.transaction(async (t) => {
       await w.update({ status: 'failed' }, { transaction: t });
       await releaseCommissions(id, t);
     });

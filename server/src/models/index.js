@@ -2,10 +2,10 @@
 const { Sequelize } = require('sequelize');
 const config = require('../config');
 
-const sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, {
-  host: config.db.host,
-  port: config.db.port,
-  dialect: 'mysql',
+// 集成测试可经 DB_DIALECT=sqlite + DB_STORAGE=:memory: 覆盖（生产不受影响，默认 mysql）
+const dialect = process.env.DB_DIALECT || 'mysql';
+const options = {
+  dialect,
   logging: config.env === 'development' ? console.log : false,
   define: {
     underscored: true,
@@ -17,7 +17,10 @@ const sequelize = new Sequelize(config.db.name, config.db.user, config.db.passwo
     acquire: 30000,
     idle: 10000
   }
-});
+};
+if (dialect === 'sqlite') options.storage = process.env.DB_STORAGE || ':memory:';
+
+const sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, options);
 
 const db = { sequelize };
 

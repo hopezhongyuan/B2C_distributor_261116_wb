@@ -1,6 +1,6 @@
 // withdraw.service — 提现申请/概览/记录（契约：docs/api/withdraw.md）
 // 事务链：在途互斥 → 余额校验 → FOR UPDATE 锁定佣金 AVAILABLE→WITHDRAWING → 建单（待打款）
-const { Sequelize, Op, Withdrawal, Commission, User, Config } = require('../models');
+const { Sequelize, sequelize, Op, Withdrawal, Commission, User, Config } = require('../models');
 const secret = require('../utils/secret');
 const config = require('../config');
 const ERRORS = require('../config/errors');
@@ -75,7 +75,8 @@ async function applyWithdraw(uid, { amountCents, realName, idCardNo }) {
   if (!Number.isInteger(amountCents) || amountCents <= 0) {
     throw { code: ERRORS.PARAM_INVALID, msg: '金额非法' };
   }
-  return Sequelize.transaction(async (t) => {
+  // 实例方法（Sequelize v6 无类静态 transaction；原写法在线上会直接 TypeError）
+  return sequelize.transaction(async (t) => {
     const user = await User.findByPk(uid, { attributes: ['id', 'realName', 'debtCents'], transaction: t, lock: t.LOCK.UPDATE });
     // PRD §3.3：退款追偿欠款还清前冻结提现
     if (Number(user.debtCents) > 0) {
